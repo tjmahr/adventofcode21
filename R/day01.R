@@ -125,13 +125,14 @@
 #' larger than the previous sum?*
 #'
 #' @param depths a vector of depths
-#' @return For Part One, `f01a(x)` returns .... For Part Two,
-#'   `f01b(x)` returns ....
+#' @return For Part One, `f01_count_increases()` returns how many times the
+#'   depth increased. For Part Two, `f01_count_shingled_increases()` returns the
+#'   number of increases over using shingled (rolling sums) depths.
 #' @export
 #' @examples
-#' f01a(example_data_01())
-#' f01b()
-f01a <- function(depths) {
+#' f01_count_increases(example_data_01())
+#' f01_count_shingled_increases(example_data_01())
+f01_count_increases <- function(depths) {
   depths <- as.numeric(depths)
   sum(sign(diff(depths)) > 0)
 }
@@ -139,24 +140,24 @@ f01a <- function(depths) {
 
 #' @rdname day01
 #' @export
-f01b <- function(x) {
-  xs <- as.numeric(x)
-  sums <- numeric(length(xs) - 2)
-  spot <- 1
-  while (length(xs) >= 3) {
-    first <- xs[1:3]
-    sums[spot] <- sum(first)
-    spot <- spot + 1
-    xs <- xs[-1]
-  }
-
-  f01a(sums)
+f01_count_shingled_increases <- function(depths) {
+  xs <- as.numeric(depths)
+  # create list of 3-item subgroups
+  shingle(xs, 3) |>
+    lapply(sum) |>
+    unlist() |>
+    f01_count_increases()
 }
 
 
-f01_helper <- function(x) {
-
+shingle <- function(x, width = 3) {
+  num_groups <- length(x) - (width - 1)
+  seq_len(num_groups) |>
+    lapply(seq, length.out = width, by = 1) |>
+    lapply(function(xs) x[xs])
 }
+
+
 
 
 #' @param example Which example data to use (by position or name). Defaults to

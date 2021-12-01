@@ -2,14 +2,14 @@
 % Please edit documentation in R/day01.R
 \name{day01}
 \alias{day01}
-\alias{f01a}
-\alias{f01b}
+\alias{f01_count_increases}
+\alias{f01_count_shingled_increases}
 \alias{example_data_01}
 \title{Day 01: Sonar Sweep}
 \usage{
-f01a(depths)
+f01_count_increases(depths)
 
-f01b(x)
+f01_count_shingled_increases(depths)
 
 example_data_01(example = 1)
 }
@@ -20,8 +20,9 @@ example_data_01(example = 1)
 1.}
 }
 \value{
-For Part One, \code{f01a(x)} returns .... For Part Two,
-\code{f01b(x)} returns ....
+For Part One, \code{f01_count_increases()} returns how many times the
+depth increased. For Part Two, \code{f01_count_shingled_increases()} returns the
+number of increases over using shingled (rolling sums) depths.
 }
 \description{
 \href{https://adventofcode.com/2021/day/1}{Sonar Sweep}
@@ -142,6 +143,6 @@ Consider sums of a three-measurement sliding window. \emph{How many sums are
 larger than the previous sum?}
 }
 \examples{
-f01a(example_data_01())
-f01b()
+f01_count_increases(example_data_01())
+f01_count_shingled_increases(example_data_01())
 }
