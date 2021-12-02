@@ -11,3 +11,10 @@ mod1 <- function(x, m) {
   r <- x %% m
   ifelse(r == 0, m, r)
 }
+
+#' Pipe friendly version of `Reduce()`
+#' @param x,f,... arguments for `Reduce()`
+#' @return `Reduce(f, x, ...)`
+f_reduce <- function(x, f, ...) {
+  Reduce(f, x, ...)
+}
