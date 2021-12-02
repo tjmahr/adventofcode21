@@ -141,6 +141,7 @@ f01_count_increases <- function(depths) {
 #' @rdname day01
 #' @export
 f01_count_shingled_increases <- function(depths) {
+  # strategy: split-apply-combine
   xs <- as.numeric(depths)
   # create list of 3-item subgroups
   shingle(xs, 3) |>

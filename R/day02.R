@@ -101,17 +101,31 @@
 #' f02a_find_submarine_product(example_data_02())
 #' f02b_find_aimed_submarine_product(example_data_02())
 f02a_find_submarine_product <- function(x) {
-  # x <- example_data_02()
+  # strategy: split-apply-combine
   x |>
     lapply(parse_submarine_command) |>
     f_reduce(function(x, y) x + y) |>
     prod()
 }
 
+parse_submarine_command <- function(command) {
+  parts <- strsplit(command, " ")[[1]]
+  step <- as.numeric(parts[[2]])
+  direction <- parts[[1]]
+  position <- c(0, 0)
+
+  # I felt like trying a "branchless" implementation
+  position[1] <- position[1] + (direction == "forward") * step
+  position[2] <- position[2] - (direction == "up") * step
+  position[2] <- position[2] + (direction == "down") * step
+  position
+}
+
 
 #' @rdname day02
 #' @export
 f02b_find_aimed_submarine_product <- function(x) {
+  # strategy: convert input into R code and run the R code
   code <- x
   r_code <- gsub("(\\w+) (\\d+)", "\\1(\\2)", code)
 
@@ -131,20 +145,6 @@ f02b_find_aimed_submarine_product <- function(x) {
 
   source(exprs = parse(text = r_code), local = TRUE)
   x * y
-}
-
-
-parse_submarine_command <- function(command) {
-  parts <- strsplit(command, " ")[[1]]
-  step <- as.numeric(parts[[2]])
-  direction <- parts[[1]]
-  position <- c(0, 0)
-
-  # I felt like trying a "branchless" implementation
-  position[1] <- position[1] + (direction == "forward") * step
-  position[2] <- position[2] - (direction == "up") * step
-  position[2] <- position[2] + (direction == "down") * step
-  position
 }
 
 
