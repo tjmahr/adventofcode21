@@ -6,7 +6,7 @@ Author: Who wrote it
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 URL: https://github.com/tjmahr/adventofcode21
@@ -14,5 +14,10 @@ BugReports: https://github.com/tjmahr/adventofcode21/issues
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
 Suggests: 
+    aoc,
+    reprex,
+    usethis,
     testthat (>= 3.0.0)
+Remotes:
+    tjmahr/aoc
 Config/testthat/edition: 3
