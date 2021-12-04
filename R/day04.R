@@ -89,9 +89,23 @@
 #'
 #' **Part Two**
 #'
-#' *(Use have to manually add this yourself.)*
+#' On the other hand, it might be wise to try a different strategy: [let
+#' the giant squid
+#' win]{title="That's 'cuz a submarine don't pull things' antennas out of their sockets when they lose. Giant squid are known to do that."}.
 #'
-#' *(Try using `convert_clipboard_html_to_roxygen_md()`)*
+#' You aren\'t sure how many bingo boards a giant squid could play at once,
+#' so rather than waste time counting its arms, the safe thing to do is to
+#' *figure out which board will win last* and choose that one. That way, no
+#' matter which boards it picks, it will win for sure.
+#'
+#' In the above example, the second board is the last to win, which happens
+#' after `13` is eventually called and its middle column is completely
+#' marked. If you were to keep playing until this point, the second board
+#' would have a sum of unmarked numbers equal to `148` for a final score of
+#' `148 * 13 = 1924`.
+#'
+#' Figure out which board will win last. *Once it wins, what would its
+#' final score be?*
 #'
 #' @param x some data
 #' @return For Part One, `f04a(x)` returns .... For Part Two,
@@ -102,10 +116,19 @@
 #' f04b()
 f04a_play_bingo <- function(x) {
   # x <- example_data_04() |> readLines()
+  # strategy: use R's array functions
   d <- f04_read_input(x)
   board_array <- d$board_array
   calls <- d$calls
 
+  l <- f04_play_bingo_impl(board_array, calls)
+  l$score
+}
+
+f04_play_bingo_impl <- function(board_array, calls, call_start = 1) {
+  # x <- example_data_04() |> readLines()
+
+  # strategy: use R's array functions
   row_sums <- function(a) apply(a, c(1,3), sum)
   col_sums <- function(a) apply(a, c(2,3), sum)
   `%in_array%` <- function(board_array, calls) {
@@ -119,7 +142,7 @@ f04a_play_bingo <- function(x) {
     c(row_winners, col_winners)
   }
 
-  i <- 1
+  i <- call_start
   winner <- find_winner(board_array, calls[seq_len(i)])
   while (length(winner) == 0) {
     i <- i + 1
@@ -127,14 +150,24 @@ f04a_play_bingo <- function(x) {
   }
 
   unmarked <- setdiff(board_array[, , winner], calls[seq_len(i)])
-  sum(unmarked) * calls[i]
-}
 
+  list(
+    board_array = board_array,
+    last_call = i,
+    winner = winner,
+    score = sum(unmarked) * calls[i]
+  )
+
+}
 
 #' @rdname day04
 #' @export
 f04b <- function(x) {
-
+  # x <- example_data_04() |> readLines()
+  # strategy: use R's array functions
+  d <- f04_read_input(x)
+  board_array <- d$board_array
+  calls <- d$calls
 }
 
 
