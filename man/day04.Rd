@@ -3,13 +3,13 @@
 \name{day04}
 \alias{day04}
 \alias{f04a_play_bingo}
-\alias{f04b}
+\alias{f04b_play_until_last_bingo}
 \alias{example_data_04}
 \title{Day 04: Giant Squid}
 \usage{
 f04a_play_bingo(x)
 
-f04b(x)
+f04b_play_until_last_bingo(x)
 
 example_data_04(example = 1)
 }
@@ -20,8 +20,8 @@ example_data_04(example = 1)
 1.}
 }
 \value{
-For Part One, \code{f04a(x)} returns .... For Part Two,
-\code{f04b(x)} returns ....
+For Part One, \code{f04a_play_bingo(x)} return the score of the first and
+last winning boards.
 }
 \description{
 \href{https://adventofcode.com/2021/day/4}{Giant Squid}
@@ -106,11 +106,25 @@ board?}
 
 \strong{Part Two}
 
-\emph{(Use have to manually add this yourself.)}
+On the other hand, it might be wise to try a different strategy: [let
+the giant squid
+win]{title="That's 'cuz a submarine don't pull things' antennas out of their sockets when they lose. Giant squid are known to do that."}.
 
-\emph{(Try using \code{convert_clipboard_html_to_roxygen_md()})}
+You aren\'t sure how many bingo boards a giant squid could play at once,
+so rather than waste time counting its arms, the safe thing to do is to
+\emph{figure out which board will win last} and choose that one. That way, no
+matter which boards it picks, it will win for sure.
+
+In the above example, the second board is the last to win, which happens
+after \code{13} is eventually called and its middle column is completely
+marked. If you were to keep playing until this point, the second board
+would have a sum of unmarked numbers equal to \code{148} for a final score of
+\code{148 * 13 = 1924}.
+
+Figure out which board will win last. \emph{Once it wins, what would its
+final score be?}
 }
 \examples{
 f04a_play_bingo(readLines(example_data_04()))
-f04b()
+f04b_play_until_last_bingo(readLines(example_data_04()))
 }

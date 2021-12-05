@@ -108,15 +108,14 @@
 #' final score be?*
 #'
 #' @param x some data
-#' @return For Part One, `f04a(x)` returns .... For Part Two,
-#'   `f04b(x)` returns ....
+#' @return For Part One, `f04a_play_bingo(x)` return the score of the first and
+#'   last winning boards.
 #' @export
 #' @examples
 #' f04a_play_bingo(readLines(example_data_04()))
-#' f04b()
+#' f04b_play_until_last_bingo(readLines(example_data_04()))
 f04a_play_bingo <- function(x) {
   # x <- example_data_04() |> readLines()
-  # strategy: use R's array functions
   d <- f04_read_input(x)
   board_array <- d$board_array
   calls <- d$calls
@@ -125,9 +124,26 @@ f04a_play_bingo <- function(x) {
   l$score
 }
 
-f04_play_bingo_impl <- function(board_array, calls, call_start = 1) {
-  # x <- example_data_04() |> readLines()
+#' @rdname day04
+#' @export
+f04b_play_until_last_bingo <- function(x) {
+  d <- f04_read_input(x)
+  board_array <- d$board_array
+  calls <- d$calls
+  call_start <- 1
 
+  # play until there is only one board left
+  while (dim(board_array)[3] != 1) {
+    l <- f04_play_bingo_impl(board_array, calls, call_start)
+    board_array <- board_array[, , -l$winner, drop = FALSE]
+    call_start <- l$last_call
+  }
+  l <- f04_play_bingo_impl(board_array, calls, call_start)
+  l$score
+}
+
+
+f04_play_bingo_impl <- function(board_array, calls, call_start = 1) {
   # strategy: use R's array functions
   row_sums <- function(a) apply(a, c(1,3), sum)
   col_sums <- function(a) apply(a, c(2,3), sum)
@@ -160,20 +176,6 @@ f04_play_bingo_impl <- function(board_array, calls, call_start = 1) {
 
 }
 
-#' @rdname day04
-#' @export
-f04b <- function(x) {
-  # x <- example_data_04() |> readLines()
-  # strategy: use R's array functions
-  d <- f04_read_input(x)
-  board_array <- d$board_array
-  calls <- d$calls
-}
-
-
-f04_helper <- function(x) {
-
-}
 
 f04_read_input <- function(x) {
   parse_rows <- function(xs) {
