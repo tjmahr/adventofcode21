@@ -18,3 +18,10 @@ mod1 <- function(x, m) {
 f_reduce <- function(x, f, ...) {
   Reduce(f, x, ...)
 }
+
+#' Pipe friendly version of `Filter()`
+#' @param x,f,... arguments for `Filter()`
+#' @return `Filter(f, x)`
+f_filter <- function(x, f) {
+  Filter(f, x)
+}
