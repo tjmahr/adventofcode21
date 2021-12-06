@@ -13,12 +13,14 @@ example_data_06(example = 1)
 \arguments{
 \item{x}{some data}
 
+\item{n}{number of days to simulate}
+
 \item{example}{Which example data to use (by position or name). Defaults to
 1.}
 }
 \value{
-For Part One, \code{f06a(x)} returns .... For Part Two,
-\code{f06b(x)} returns ....
+For Part One and Part Two, \code{f06a_step_n_days(x)} returns the
+frequency table for the day timers. \code{sum()} for the solution.
 }
 \description{
 \href{https://adventofcode.com/2021/day/6}{Lanternfish}
@@ -107,11 +109,15 @@ after 80 days?}
 
 \strong{Part Two}
 
-\emph{(Use have to manually add this yourself.)}
+Suppose the lanternfish live forever and have unlimited food and space.
+Would they take over the entire ocean?
 
-\emph{(Try using \code{convert_clipboard_html_to_roxygen_md()})}
+After 256 days in the example above, there would be a total of
+\code{26984457539} lanternfish!
+
+\emph{How many lanternfish would there be after 256 days?}
 }
 \examples{
 f06a_step_n_days(example_data_06())
-f06b()
+f06a_step_n_days(example_data_06(), n = 256)
 }

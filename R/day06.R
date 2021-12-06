@@ -90,24 +90,26 @@
 #'
 #' **Part Two**
 #'
-#' *(Use have to manually add this yourself.)*
+#' Suppose the lanternfish live forever and have unlimited food and space.
+#' Would they take over the entire ocean?
 #'
-#' *(Try using `convert_clipboard_html_to_roxygen_md()`)*
+#' After 256 days in the example above, there would be a total of
+#' `26984457539` lanternfish!
+#'
+#' *How many lanternfish would there be after 256 days?*
 #'
 #' @param x some data
-#' @return For Part One, `f06a(x)` returns .... For Part Two,
-#'   `f06b(x)` returns ....
+#' @param n number of days to simulate
+#' @return For Part One and Part Two, `f06a_step_n_days(x)` returns the
+#'   frequency table for the day timers. `sum()` for the solution.
 #' @export
 #' @examples
 #' f06a_step_n_days(example_data_06())
-#' f06b()
+#' f06a_step_n_days(example_data_06(), n = 256)
 f06a_step_n_days <- function(x, n = 80) {
-  # strategy: manipulating counting
+  # strategy: manipulating counts
   counts <- x |> f06_read_and_count()
-  while (n != 0) {
-    n <- n - 1
-    counts <- counts |> f06_step_day()
-  }
+  counts <- f_loop_n(counts, n, f06_step_day)
   counts
 }
 

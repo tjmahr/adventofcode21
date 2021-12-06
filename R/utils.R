@@ -20,8 +20,36 @@ f_reduce <- function(x, f, ...) {
 }
 
 #' Pipe friendly version of `Filter()`
-#' @param x,f,... arguments for `Filter()`
+#' @param x,f arguments for `Filter()`
 #' @return `Filter(f, x)`
 f_filter <- function(x, f) {
   Filter(f, x)
+}
+
+
+#' Repeatedly apply a function
+#' @param .x input data
+#' @param .reps number of times to call the function
+#' @param .f function to call
+#' @param ... arguments passed onto `.f()`
+#' @return result of calling `.f(.x, ...)` `.rep` times
+#' @source https://www.tjmahr.com/repeatedly-calling-a-function/
+f_loop_n <- function(.x, .reps = 1, .f, ...) {
+  # A single, finite, non-negative number of repetitions
+  stopifnot(
+    length(.reps) == 1,
+    !is.na(.reps),
+    .reps >= 0,
+    is.finite(.reps)
+  )
+
+  # 0 .reps
+  value <- .x
+
+  while (.reps >= 1) {
+    value <- .f(value, ...)
+    .reps <- .reps - 1
+  }
+
+  value
 }

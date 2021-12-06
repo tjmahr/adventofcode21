@@ -7,7 +7,7 @@
 f_filter(x, f)
 }
 \arguments{
-\item{x, f, ...}{arguments for \code{Filter()}}
+\item{x, f}{arguments for \code{Filter()}}
 }
 \value{
 \code{Filter(f, x)}
