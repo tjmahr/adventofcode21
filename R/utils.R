@@ -26,6 +26,13 @@ f_filter <- function(x, f) {
   Filter(f, x)
 }
 
+# chr_gsub <- function(x, pattern, replacement, perl = TRUE, ...) {
+#   gsub(pattern = pattern, x = x, replacement = replacement, perl, ...)
+# }
+# chr_sub <- function(x, pattern, replacement, perl = TRUE, ...) {
+#   sub(pattern = pattern, x = x, replacement = replacement, perl, ...)
+# }
+
 
 #' Repeatedly apply a function
 #' @param .x input data
