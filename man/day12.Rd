@@ -2,14 +2,14 @@
 % Please edit documentation in R/day12.R
 \name{day12}
 \alias{day12}
-\alias{f12a_traverse_caves}
-\alias{f12b}
+\alias{f12a_traverse_caves_once}
+\alias{f12b_traverse_caves_maybe_twice}
 \alias{example_data_12}
 \title{Day 12: Passage Pathing}
 \usage{
-f12a_traverse_caves(x)
+f12a_traverse_caves_once(x)
 
-f12b(x)
+f12b_traverse_caves_maybe_twice(x)
 
 example_data_12(example = 1)
 }
@@ -20,8 +20,9 @@ example_data_12(example = 1)
 1.}
 }
 \value{
-For Part One, \code{f12a(x)} returns .... For Part Two,
-\code{f12b(x)} returns ....
+For Part One, \code{f12a_traverse_caves_once(x)} returns the list of
+paths. For Part Two, \code{f12b_traverse_caves_maybe_twice(x)} returns the list
+of paths.
 }
 \description{
 \href{https://adventofcode.com/2021/day/12}{Passage Pathing}
@@ -148,11 +149,59 @@ caves at most once?}
 
 \strong{Part Two}
 
-\emph{(Use have to manually add this yourself.)}
+After reviewing the available paths, you realize you might have time to
+visit a single small cave \emph{twice}. Specifically, big caves can be
+visited any number of times, a single small cave can be visited at most
+twice, and the remaining small caves can be visited at most once.
+However, the caves named \code{start} and \code{end} can only be visited \emph{exactly
+once each}: once you leave the \code{start} cave, you may not return to it,
+and once you reach the \code{end} cave, the path must end immediately.
 
-\emph{(Try using \code{convert_clipboard_html_to_roxygen_md()})}
+Now, the \code{36} possible paths through the first example above are:\preformatted{start,A,b,A,b,A,c,A,end
+start,A,b,A,b,A,end
+start,A,b,A,b,end
+start,A,b,A,c,A,b,A,end
+start,A,b,A,c,A,b,end
+start,A,b,A,c,A,c,A,end
+start,A,b,A,c,A,end
+start,A,b,A,end
+start,A,b,d,b,A,c,A,end
+start,A,b,d,b,A,end
+start,A,b,d,b,end
+start,A,b,end
+start,A,c,A,b,A,b,A,end
+start,A,c,A,b,A,b,end
+start,A,c,A,b,A,c,A,end
+start,A,c,A,b,A,end
+start,A,c,A,b,d,b,A,end
+start,A,c,A,b,d,b,end
+start,A,c,A,b,end
+start,A,c,A,c,A,b,A,end
+start,A,c,A,c,A,b,end
+start,A,c,A,c,A,end
+start,A,c,A,end
+start,A,end
+start,b,A,b,A,c,A,end
+start,b,A,b,A,end
+start,b,A,b,end
+start,b,A,c,A,b,A,end
+start,b,A,c,A,b,end
+start,b,A,c,A,c,A,end
+start,b,A,c,A,end
+start,b,A,end
+start,b,d,b,A,c,A,end
+start,b,d,b,A,end
+start,b,d,b,end
+start,b,end
+}
+
+The slightly larger example above now has \code{103} paths through it, and
+the even larger example now has \code{3509} paths through it.
+
+Given these new rules, \emph{how many paths through this cave system are
+there?}
 }
 \examples{
-f12a_traverse_caves(example_data_12())
-f12b()
+f12a_traverse_caves_once(example_data_12())
+f12b_traverse_caves_maybe_twice(example_data_12())
 }

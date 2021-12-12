@@ -185,71 +185,60 @@
 #' there?*
 #'
 #' @param x some data
-#' @return For Part One, `f12a(x)` returns .... For Part Two,
-#'   `f12b(x)` returns ....
+#' @return For Part One, `f12a_traverse_caves_once(x)` returns the list of
+#'   paths. For Part Two, `f12b_traverse_caves_maybe_twice(x)` returns the list
+#'   of paths.
 #' @export
 #' @examples
-#' f12a_traverse_caves(example_data_12())
-#' f12b()
-f12a_traverse_caves <- function(x) {
-  f_rule <- function(candidates, history) {
+#' f12a_traverse_caves_once(example_data_12())
+#' f12b_traverse_caves_maybe_twice(example_data_12())
+f12a_traverse_caves_once <- function(x) {
+  # strategy: recursion + lookup vectors
+  filter_candidates <- function(candidates, history) {
     is_lower <- function(xs) xs == tolower(xs)
     visited <- is.element(candidates, history)
     candidates[!(is_lower(candidates) & visited)]
   }
-
-  f12_helper(x, f_rule)
+  f12a_traverse_caves(x, filter_candidates)
 }
 
 
 #' @rdname day12
 #' @export
-f12b <- function(x) {
-  # hist
-  # candidates <- paths[[tail(history, 1)]]
-  # history <- c("start","A","b","A")
-  f_rule <- function(candidates, history) {
+f12b_traverse_caves_maybe_twice <- function(x) {
+  filter_candidates <- function(candidates, history) {
     is_lower <- function(xs) xs == tolower(xs)
     lc_candidates <- candidates[is_lower(candidates)]
     uc_candidates <- candidates[!is_lower(candidates)]
-    # lc_one_visit <- lc_candidates[is.element(lc_candidates, history)]
 
-    u_history <- unique(history)
+    # count appearance of items, including candidates, so that counts of
+    # unvisited candidates can be 0
+    u_history <- unique(c(history, candidates))
     all_counts <- u_history |>
       lapply(function(xs) sum(history %in% xs)) |>
       stats::setNames(u_history) |>
       unlist()
+
+    # counts of lc items
     lc_names <- which(all_counts |> names() |> is_lower())
     lc_counts <- all_counts[lc_names]
 
     if (any(lc_counts == 2)) {
       lc_candidates <- names(lc_counts)[which(lc_counts < 1)]
-    } else {
-      lc_candidates <- lc_candidates
     }
 
     c(uc_candidates, lc_candidates)
   }
 
-  y <- f12_helper(x, f_rule)
-  z <- example_data_12(4) |> lapply(strsplit, ",") |> lapply(unlist)
-  history <- setdiff(y, z)[[1]]
-  history <- head(history, 8)
-  candidates <- paths[[tail(history, 1)]]
-
-  y %in% z
-  z %in% y
+  f12a_traverse_caves(x, filter_candidates)
 }
 
 
-f12_helper <- function(x, user_f_rule) {
-
-  # strategy: recursion + lookup vectors
+f12a_traverse_caves <- function(x, user_f_rule) {
   is_lower <- function(xs) xs == tolower(xs)
 
   walk_next_step <- function(history, paths = from_to, f_rule = user_f_rule) {
     # find valid next steps
-    # history
     candidates <- paths[[tail(history, 1)]]
     candidates <- f_rule(candidates, history)
 
@@ -257,10 +246,6 @@ f12_helper <- function(x, user_f_rule) {
     if (length(candidates) == 0) {
       history
     } else {
-
-      # t <- candidates |>
-      #   lapply(function(xs) c(history, xs))
-      # history <- sample(t, 1)[[1]]
       candidates |>
         lapply(function(xs) c(history, xs)) |>
         lapply(walk_next_step, paths, f_rule)
