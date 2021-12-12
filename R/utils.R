@@ -19,6 +19,13 @@ f_reduce <- function(x, f, ...) {
   Reduce(f, x, ...)
 }
 
+#' Pipe friendly version of `Map()`
+#' @param x,y,f,... arguments for `Map()`
+#' @return `Map(f, x, y, ...)`
+f_map2 <- function(x, y, f, ...) {
+  Map(f, x, y, ...)
+}
+
 #' Pipe friendly version of `Filter()`
 #' @param x,f arguments for `Filter()`
 #' @return `Filter(f, x)`

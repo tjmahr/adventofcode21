@@ -1,7 +1,7 @@
 library(adventofcode21)
 x <- readLines("./inst/input12.txt")
 
-p1 <- f12a(x)
+p1 <- f12a_traverse_caves(x) |> length()
 p2 <- f12b(x)
 
 stopifnot(p1 == aoc_solutions$day12a)

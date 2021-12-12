@@ -131,31 +131,152 @@
 #'
 #' **Part Two**
 #'
-#' *(Use have to manually add this yourself.)*
+#' After reviewing the available paths, you realize you might have time to
+#' visit a single small cave *twice*. Specifically, big caves can be
+#' visited any number of times, a single small cave can be visited at most
+#' twice, and the remaining small caves can be visited at most once.
+#' However, the caves named `start` and `end` can only be visited *exactly
+#' once each*: once you leave the `start` cave, you may not return to it,
+#' and once you reach the `end` cave, the path must end immediately.
 #'
-#' *(Try using `convert_clipboard_html_to_roxygen_md()`)*
+#' Now, the `36` possible paths through the first example above are:
+#'
+#'     start,A,b,A,b,A,c,A,end
+#'     start,A,b,A,b,A,end
+#'     start,A,b,A,b,end
+#'     start,A,b,A,c,A,b,A,end
+#'     start,A,b,A,c,A,b,end
+#'     start,A,b,A,c,A,c,A,end
+#'     start,A,b,A,c,A,end
+#'     start,A,b,A,end
+#'     start,A,b,d,b,A,c,A,end
+#'     start,A,b,d,b,A,end
+#'     start,A,b,d,b,end
+#'     start,A,b,end
+#'     start,A,c,A,b,A,b,A,end
+#'     start,A,c,A,b,A,b,end
+#'     start,A,c,A,b,A,c,A,end
+#'     start,A,c,A,b,A,end
+#'     start,A,c,A,b,d,b,A,end
+#'     start,A,c,A,b,d,b,end
+#'     start,A,c,A,b,end
+#'     start,A,c,A,c,A,b,A,end
+#'     start,A,c,A,c,A,b,end
+#'     start,A,c,A,c,A,end
+#'     start,A,c,A,end
+#'     start,A,end
+#'     start,b,A,b,A,c,A,end
+#'     start,b,A,b,A,end
+#'     start,b,A,b,end
+#'     start,b,A,c,A,b,A,end
+#'     start,b,A,c,A,b,end
+#'     start,b,A,c,A,c,A,end
+#'     start,b,A,c,A,end
+#'     start,b,A,end
+#'     start,b,d,b,A,c,A,end
+#'     start,b,d,b,A,end
+#'     start,b,d,b,end
+#'     start,b,end
+#'
+#' The slightly larger example above now has `103` paths through it, and
+#' the even larger example now has `3509` paths through it.
+#'
+#' Given these new rules, *how many paths through this cave system are
+#' there?*
 #'
 #' @param x some data
 #' @return For Part One, `f12a(x)` returns .... For Part Two,
 #'   `f12b(x)` returns ....
 #' @export
 #' @examples
-#' f12a(example_data_12())
+#' f12a_traverse_caves(example_data_12())
 #' f12b()
-f12a <- function(x) {
+f12a_traverse_caves <- function(x) {
+  f_rule <- function(candidates, history) {
+    is_lower <- function(xs) xs == tolower(xs)
+    visited <- is.element(candidates, history)
+    candidates[!(is_lower(candidates) & visited)]
+  }
 
+  f12_helper(x, f_rule)
 }
 
 
 #' @rdname day12
 #' @export
 f12b <- function(x) {
+  # hist
+  # candidates <- paths[[tail(history, 1)]]
+  # history <- c("start","A","b","A")
+  f_rule <- function(candidates, history) {
+    is_lower <- function(xs) xs == tolower(xs)
+    lc_candidates <- candidates[is_lower(candidates)]
+    uc_candidates <- candidates[!is_lower(candidates)]
+    # lc_one_visit <- lc_candidates[is.element(lc_candidates, history)]
 
+    u_history <- unique(history)
+    all_counts <- u_history |>
+      lapply(function(xs) sum(history %in% xs)) |>
+      stats::setNames(u_history) |>
+      unlist()
+    lc_names <- which(all_counts |> names() |> is_lower())
+    lc_counts <- all_counts[lc_names]
+
+    if (any(lc_counts == 2)) {
+      lc_candidates <- names(lc_counts)[which(lc_counts < 1)]
+    } else {
+      lc_candidates <- lc_candidates
+    }
+
+    c(uc_candidates, lc_candidates)
+  }
+
+  y <- f12_helper(x, f_rule)
+  z <- example_data_12(4) |> lapply(strsplit, ",") |> lapply(unlist)
+  history <- setdiff(y, z)[[1]]
+  history <- head(history, 8)
+  candidates <- paths[[tail(history, 1)]]
+
+  y %in% z
+  z %in% y
 }
 
 
-f12_helper <- function(x) {
-  x <- example_data_12()
+f12_helper <- function(x, user_f_rule) {
+
+  # strategy: recursion + lookup vectors
+  is_lower <- function(xs) xs == tolower(xs)
+
+  walk_next_step <- function(history, paths = from_to, f_rule = user_f_rule) {
+    # find valid next steps
+    # history
+    candidates <- paths[[tail(history, 1)]]
+    candidates <- f_rule(candidates, history)
+
+    # dead-end or recursively walk down the candidates
+    if (length(candidates) == 0) {
+      history
+    } else {
+
+      # t <- candidates |>
+      #   lapply(function(xs) c(history, xs))
+      # history <- sample(t, 1)[[1]]
+      candidates |>
+        lapply(function(xs) c(history, xs)) |>
+        lapply(walk_next_step, paths, f_rule)
+    }
+  }
+
+  # walk_next_step() returns a deeply nested list so flatten it
+  flatten_path_list <- function(l) {
+    all_steps <- unlist(l, use.names = FALSE)
+    starts <- which(all_steps == "start")
+    starts |>
+      f_map2(c(starts[-1] - 1, length(all_steps)), seq) |>
+      lapply(function(xs) all_steps[xs])
+  }
+
+  # Make a dataframe of all valid paths
   edges <- x |> strsplit("-")
   edge_df <- c(edges, lapply(edges, rev)) |>
     lapply(function(x) data.frame(from = x[1], to = x[2])) |>
@@ -164,49 +285,16 @@ f12_helper <- function(x) {
   edge_df <- edge_df[edge_df[["to"]] != "start", ]
   edge_df <- edge_df[edge_df[["from"]] != "end", ]
 
+  # Convert the dataframe into a look-up vector
   from_to <- edge_df |>
     split(~from) |>
     lapply(function(xs) {
       stats::setNames(xs[["to"]], xs[["from"]])
     })
 
-  history <- "start"
-  is_lower <- function(xs) xs == tolower(xs)
-  walk_next_step <- function(history) {
-    candidates <- from_to[[tail(history, 1)]]
-    visited <- is.element(candidates, history)
-    candidates <- candidates[!(is_lower(candidates) & visited)]
-    next_steps <- candidates |>
-      lapply(function(xs) c(history, xs)) |>
-      unname()
-    results <- as.list(seq_along(candidates))
-
-    if (length(candidates) == 0) {
-      results <- history
-    }
-    for (step in seq_along(candidates)) {
-      # history <- c(history, candidates[step])
-      new_history <- c(history, candidates[step])
-      if (candidates[step] == "done") {
-        results[[step]] <- new_history
-      } else {
-        results[[step]] <- walk_next_step(new_history)
-      }
-    }
-    results
-  }
-
-  walk_next_step("start") |> rapply(unlist_one)
-  unlist_one <- function(xs) if (length(xs) == 1) unlist(xs, recursive = FALSE) else xs
-
-  starting_histories <- from_to[["start"]] |>
-    as.list() |>
-    unname() |>
-    lapply(function(x) c("start", x))
-
-
-
-  from_to[["A"]]
+  walk_next_step("start", from_to, user_f_rule) |>
+    flatten_path_list() |>
+    f_filter(function(xs) tail(xs, 1) == "end")
  }
 
 
@@ -224,7 +312,76 @@ example_data_12 <- function(example = 1) {
       "b-d",
       "A-end",
       "b-end"
-
+    ),
+    b = c(
+      "dc-end",
+      "HN-start",
+      "start-kj",
+      "dc-start",
+      "dc-HN",
+      "LN-dc",
+      "HN-end",
+      "kj-sa",
+      "kj-HN",
+      "kj-dc"
+    ),
+    c = c(
+      "fs-end",
+      "he-DX",
+      "fs-he",
+      "start-DX",
+      "pj-DX",
+      "end-zg",
+      "zg-sl",
+      "zg-pj",
+      "pj-he",
+      "RW-he",
+      "fs-DX",
+      "pj-RW",
+      "zg-RW",
+      "start-pj",
+      "he-WI",
+      "zg-he",
+      "pj-fs",
+      "start-RW"
+    ),
+    d = c(
+      "start,A,b,A,b,A,c,A,end",
+      "start,A,b,A,b,A,end",
+      "start,A,b,A,b,end",
+      "start,A,b,A,c,A,b,A,end",
+      "start,A,b,A,c,A,b,end",
+      "start,A,b,A,c,A,c,A,end",
+      "start,A,b,A,c,A,end",
+      "start,A,b,A,end",
+      "start,A,b,d,b,A,c,A,end",
+      "start,A,b,d,b,A,end",
+      "start,A,b,d,b,end",
+      "start,A,b,end",
+      "start,A,c,A,b,A,b,A,end",
+      "start,A,c,A,b,A,b,end",
+      "start,A,c,A,b,A,c,A,end",
+      "start,A,c,A,b,A,end",
+      "start,A,c,A,b,d,b,A,end",
+      "start,A,c,A,b,d,b,end",
+      "start,A,c,A,b,end",
+      "start,A,c,A,c,A,b,A,end",
+      "start,A,c,A,c,A,b,end",
+      "start,A,c,A,c,A,end",
+      "start,A,c,A,end",
+      "start,A,end",
+      "start,b,A,b,A,c,A,end",
+      "start,b,A,b,A,end",
+      "start,b,A,b,end",
+      "start,b,A,c,A,b,A,end",
+      "start,b,A,c,A,b,end",
+      "start,b,A,c,A,c,A,end",
+      "start,b,A,c,A,end",
+      "start,b,A,end",
+      "start,b,d,b,A,c,A,end",
+      "start,b,d,b,A,end",
+      "start,b,d,b,end",
+      "start,b,end"
     )
   )
   l[[example]]
