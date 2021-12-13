@@ -118,5 +118,5 @@ basins?}
 }
 \examples{
 f09a_find_lava_risk_level(example_data_09())
-f09b()
+f09b_find_basins(example_data_09())
 }

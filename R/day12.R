@@ -239,7 +239,7 @@ f12a_traverse_caves <- function(x, user_f_rule) {
 
   walk_next_step <- function(history, paths = from_to, f_rule = user_f_rule) {
     # find valid next steps
-    candidates <- paths[[tail(history, 1)]]
+    candidates <- paths[[utils::tail(history, 1)]]
     candidates <- f_rule(candidates, history)
 
     # dead-end or recursively walk down the candidates
@@ -279,7 +279,7 @@ f12a_traverse_caves <- function(x, user_f_rule) {
 
   walk_next_step("start", from_to, user_f_rule) |>
     flatten_path_list() |>
-    f_filter(function(xs) tail(xs, 1) == "end")
+    f_filter(function(xs) utils::tail(xs, 1) == "end")
  }
 
 

@@ -2,26 +2,29 @@
 % Please edit documentation in R/day11.R
 \name{day11}
 \alias{day11}
-\alias{f11a}
-\alias{f11b}
+\alias{f11a_run_n_steps}
+\alias{f11b_run_until_all_flash}
 \alias{example_data_11}
 \title{Day 11: Dumbo Octopus}
 \usage{
-f11a(x)
+f11a_run_n_steps(x, num_steps)
 
-f11b(x)
+f11b_run_until_all_flash(x)
 
 example_data_11(example = 1)
 }
 \arguments{
 \item{x}{some data}
 
+\item{num_steps}{number of steps to run the grid.}
+
 \item{example}{Which example data to use (by position or name). Defaults to
 1.}
 }
 \value{
-For Part One, \code{f11a(x)} returns .... For Part Two,
-\code{f11b(x)} returns ....
+For Part One, \code{f11a_run_n_steps(x)} returns a vector with the number
+of flashes on each iteration. For Part Two, \code{f11b_run_until_all_flash(x)}
+returns the number of iterations until all of the units flash.
 }
 \description{
 \href{https://adventofcode.com/2021/day/11}{Dumbo Octopus}
@@ -354,6 +357,7 @@ simulate 100 steps. \emph{How many total flashes are there after 100 steps?}
 \emph{(Try using \code{convert_clipboard_html_to_roxygen_md()})}
 }
 \examples{
-f11a(example_data_11())
-f11b()
+f11a_run_n_steps(example_data_11(), 1)
+f11a_run_n_steps(example_data_11(), 10)
+f11b_run_until_all_flash(example_data_11(2))
 }

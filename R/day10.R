@@ -189,7 +189,7 @@ f10b_score_incomplete_lines <- function(x) {
       f_reduce(.x, function(x, y) x * 5 + y, init = 0)
     }) |>
     unlist() |>
-    median()
+    stats::median()
 }
 
 f10_is_opening <- function(x) x %in% c("(", "[", "<", "{")

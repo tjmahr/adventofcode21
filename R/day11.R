@@ -337,38 +337,58 @@
 #' *(Try using `convert_clipboard_html_to_roxygen_md()`)*
 #'
 #' @param x some data
-#' @return For Part One, `f11a(x)` returns .... For Part Two,
-#'   `f11b(x)` returns ....
+#' @param num_steps number of steps to run the grid.
+#' @return For Part One, `f11a_run_n_steps(x)` returns a vector with the number
+#'   of flashes on each iteration. For Part Two, `f11b_run_until_all_flash(x)`
+#'   returns the number of iterations until all of the units flash.
 #' @export
 #' @examples
-#' f11a(example_data_11())
-#' f11b()
-f11a <- function(x) {
+#' f11a_run_n_steps(example_data_11(), 1)
+#' f11a_run_n_steps(example_data_11(), 10)
+#' f11b_run_until_all_flash(example_data_11(2))
+f11a_run_n_steps <- function(x, num_steps) {
+  # strategy: matrix subsetting
+  x <- f11_read_input(x)
+  history <- numeric(num_steps)
 
+  for (step_i in seq_len(num_steps)) {
+    result <- f11_run_step(x)
+    history[step_i] <- result$n_flashes
+    x <- result$grid
+  }
+  history
 }
-
 
 #' @rdname day11
 #' @export
-f11b <- function(x) {
+f11b_run_until_all_flash <- function(x) {
+  x <- f11_read_input(x)
 
+  total <- length(x)
+  last_flash <- 0
+  counter <- 0
+  while (last_flash != total) {
+    result <- f11_run_step(x)
+    x <- result$grid
+    last_flash <- result$n_flashes
+    counter <- counter + 1
+  }
+
+  counter
 }
 
 
-f11_helper <- function(x) {
-  x <- example_data_11()
-  x <- x |> strsplit("") |> lapply(as.numeric) |> simplify2array() |> t()
-  x
-
+f11_run_step <- function(x) {
+  x <- x + 1
+  # neighbors from a matrix of i,j rows
   get_neighbors_m <- function(m, nr = 10, nc = 10) {
-    # get the neighbors for each row
     seq_len(nrow(m)) |>
       lapply(function(i) get_neighbors_ij(m[i, 1], m[i, 2], nr, nc))
   }
 
+  # neighbors from i,j
   get_neighbors_ij <- function(i, j, nr = 10, nc = 10) {
-    # i <- sample(0:10, 1)
-    # j <- sample(0:10, 1)
+    # all pairs except 0,0
     c1 <- c(-1, -1, -1,  0, 0,  1, 1, 1) + i
     c2 <- c(-1,  0,  1, -1, 1, -1, 0, 1) + j
     out_of_bounds <- c1 < 1 | c2 < 1 | c1 > nr | c2 > nc
@@ -376,16 +396,11 @@ f11_helper <- function(x) {
     o
   }
 
-
-
-  x0 <- x
-  x <- x + 1
-
   flash_grid <- function(x) {
     m <- which(x > 9, arr.ind = TRUE)
     # use NA to "saturate" the cell
     x[m] <- NA
-    l <- get_neighbors_m(m)
+    l <- get_neighbors_m(m, nr = nrow(x), nc = ncol(x))
     for (neighbor_set in l) {
       x[neighbor_set] <- x[neighbor_set] + 1
     }
@@ -404,7 +419,17 @@ f11_helper <- function(x) {
   while (grid_can_flash(x)) {
     x <- flash_grid(x)
   }
-  reset_grid(x)
+
+  list(
+    grid = reset_grid(x),
+    n_flashes = sum(is.na(x))
+  )
+}
+
+
+f11_read_input <- function(x) {
+  x <- x |> strsplit("") |> lapply(as.numeric) |> simplify2array() |> t()
+  x
 }
 
 
@@ -420,6 +445,18 @@ example_data_11 <- function(example = 1) {
       "19191",
       "19991",
       "11111"
+    ),
+    b = c(
+      "5483143223",
+      "2745854711",
+      "5264556173",
+      "6141336146",
+      "6357385478",
+      "4167524645",
+      "2176841721",
+      "6882881134",
+      "4846848554",
+      "5283751526"
     )
   )
   l[[example]]
