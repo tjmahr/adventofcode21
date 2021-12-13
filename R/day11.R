@@ -360,7 +360,13 @@ f11_helper <- function(x) {
   x <- x |> strsplit("") |> lapply(as.numeric) |> simplify2array() |> t()
   x
 
-  get_neighbors <- function(i, j, nr = 10, nc = 10) {
+  get_neighbors_m <- function(m, nr = 10, nc = 10) {
+    # get the neighbors for each row
+    seq_len(nrow(m)) |>
+      lapply(function(i) get_neighbors_ij(m[i, 1], m[i, 2], nr, nc))
+  }
+
+  get_neighbors_ij <- function(i, j, nr = 10, nc = 10) {
     # i <- sample(0:10, 1)
     # j <- sample(0:10, 1)
     c1 <- c(-1, -1, -1,  0, 0,  1, 1, 1) + i
@@ -370,8 +376,35 @@ f11_helper <- function(x) {
     o
   }
 
-  which(x + 1 > 9, arr.ind = TRUE)
 
+
+  x0 <- x
+  x <- x + 1
+
+  flash_grid <- function(x) {
+    m <- which(x > 9, arr.ind = TRUE)
+    # use NA to "saturate" the cell
+    x[m] <- NA
+    l <- get_neighbors_m(m)
+    for (neighbor_set in l) {
+      x[neighbor_set] <- x[neighbor_set] + 1
+    }
+    x
+  }
+
+  grid_can_flash <- function(x) {
+    any(as.vector(x)[!is.na(x)] > 9)
+  }
+
+  reset_grid <- function(x) {
+    x[is.na(x)] <- 0
+    x
+  }
+
+  while (grid_can_flash(x)) {
+    x <- flash_grid(x)
+  }
+  reset_grid(x)
 }
 
 
