@@ -60,53 +60,165 @@
 #'
 #' **Part Two**
 #'
-#' *(Use have to manually add this yourself.)*
+#' Now that you know how to find low-risk paths in the cave, you can try to
+#' find your way out.
 #'
-#' *(Try using `convert_clipboard_html_to_roxygen_md()`)*
+#' The entire cave is actually *five times larger in both dimensions* than
+#' you thought; the area you originally scanned is just one tile in a 5x5
+#' tile area that forms the full map. Your original map tile repeats to the
+#' right and downward; each time the tile repeats to the right or downward,
+#' all of its risk levels *are 1 higher* than the tile immediately up or
+#' left of it. However, risk levels above `9` wrap back around to `1`. So,
+#' if your original map had some position with a risk level of `8`, then
+#' that same position on each of the 25 total tiles would be as follows:
+#'
+#'     8 9 1 2 3
+#'     9 1 2 3 4
+#'     1 2 3 4 5
+#'     2 3 4 5 6
+#'     3 4 5 6 7
+#'
+#' Each single digit above corresponds to the example position with a value
+#' of `8` on the top-left tile. Because the full map is actually five times
+#' larger in both dimensions, that position appears a total of 25 times,
+#' once in each duplicated tile, with the values shown above.
+#'
+#' Here is the full five-times-as-large version of the first example above,
+#' with the original map in the top left corner highlighted:
+#'
+#'     11637517422274862853338597396444961841755517295286
+#'     13813736722492484783351359589446246169155735727126
+#'     21365113283247622439435873354154698446526571955763
+#'     36949315694715142671582625378269373648937148475914
+#'     74634171118574528222968563933317967414442817852555
+#'     13191281372421239248353234135946434524615754563572
+#'     13599124212461123532357223464346833457545794456865
+#'     31254216394236532741534764385264587549637569865174
+#'     12931385212314249632342535174345364628545647573965
+#'     23119445813422155692453326671356443778246755488935
+#'     22748628533385973964449618417555172952866628316397
+#'     24924847833513595894462461691557357271266846838237
+#'     32476224394358733541546984465265719557637682166874
+#'     47151426715826253782693736489371484759148259586125
+#'     85745282229685639333179674144428178525553928963666
+#'     24212392483532341359464345246157545635726865674683
+#'     24611235323572234643468334575457944568656815567976
+#'     42365327415347643852645875496375698651748671976285
+#'     23142496323425351743453646285456475739656758684176
+#'     34221556924533266713564437782467554889357866599146
+#'     33859739644496184175551729528666283163977739427418
+#'     35135958944624616915573572712668468382377957949348
+#'     43587335415469844652657195576376821668748793277985
+#'     58262537826937364893714847591482595861259361697236
+#'     96856393331796741444281785255539289636664139174777
+#'     35323413594643452461575456357268656746837976785794
+#'     35722346434683345754579445686568155679767926678187
+#'     53476438526458754963756986517486719762859782187396
+#'     34253517434536462854564757396567586841767869795287
+#'     45332667135644377824675548893578665991468977611257
+#'     44961841755517295286662831639777394274188841538529
+#'     46246169155735727126684683823779579493488168151459
+#'     54698446526571955763768216687487932779859814388196
+#'     69373648937148475914825958612593616972361472718347
+#'     17967414442817852555392896366641391747775241285888
+#'     46434524615754563572686567468379767857948187896815
+#'     46833457545794456865681556797679266781878137789298
+#'     64587549637569865174867197628597821873961893298417
+#'     45364628545647573965675868417678697952878971816398
+#'     56443778246755488935786659914689776112579188722368
+#'     55172952866628316397773942741888415385299952649631
+#'     57357271266846838237795794934881681514599279262561
+#'     65719557637682166874879327798598143881961925499217
+#'     71484759148259586125936169723614727183472583829458
+#'     28178525553928963666413917477752412858886352396999
+#'     57545635726865674683797678579481878968159298917926
+#'     57944568656815567976792667818781377892989248891319
+#'     75698651748671976285978218739618932984172914319528
+#'     56475739656758684176786979528789718163989182927419
+#'     67554889357866599146897761125791887223681299833479
+#'
+#' Equipped with the full map, you can now find a path from the top left
+#' corner to the bottom right corner with the lowest total risk:
+#'
+#'     11637517422274862853338597396444961841755517295286
+#'     13813736722492484783351359589446246169155735727126
+#'     21365113283247622439435873354154698446526571955763
+#'     36949315694715142671582625378269373648937148475914
+#'     74634171118574528222968563933317967414442817852555
+#'     13191281372421239248353234135946434524615754563572
+#'     13599124212461123532357223464346833457545794456865
+#'     31254216394236532741534764385264587549637569865174
+#'     12931385212314249632342535174345364628545647573965
+#'     23119445813422155692453326671356443778246755488935
+#'     22748628533385973964449618417555172952866628316397
+#'     24924847833513595894462461691557357271266846838237
+#'     32476224394358733541546984465265719557637682166874
+#'     47151426715826253782693736489371484759148259586125
+#'     85745282229685639333179674144428178525553928963666
+#'     24212392483532341359464345246157545635726865674683
+#'     24611235323572234643468334575457944568656815567976
+#'     42365327415347643852645875496375698651748671976285
+#'     23142496323425351743453646285456475739656758684176
+#'     34221556924533266713564437782467554889357866599146
+#'     33859739644496184175551729528666283163977739427418
+#'     35135958944624616915573572712668468382377957949348
+#'     43587335415469844652657195576376821668748793277985
+#'     58262537826937364893714847591482595861259361697236
+#'     96856393331796741444281785255539289636664139174777
+#'     35323413594643452461575456357268656746837976785794
+#'     35722346434683345754579445686568155679767926678187
+#'     53476438526458754963756986517486719762859782187396
+#'     34253517434536462854564757396567586841767869795287
+#'     45332667135644377824675548893578665991468977611257
+#'     44961841755517295286662831639777394274188841538529
+#'     46246169155735727126684683823779579493488168151459
+#'     54698446526571955763768216687487932779859814388196
+#'     69373648937148475914825958612593616972361472718347
+#'     17967414442817852555392896366641391747775241285888
+#'     46434524615754563572686567468379767857948187896815
+#'     46833457545794456865681556797679266781878137789298
+#'     64587549637569865174867197628597821873961893298417
+#'     45364628545647573965675868417678697952878971816398
+#'     56443778246755488935786659914689776112579188722368
+#'     55172952866628316397773942741888415385299952649631
+#'     57357271266846838237795794934881681514599279262561
+#'     65719557637682166874879327798598143881961925499217
+#'     71484759148259586125936169723614727183472583829458
+#'     28178525553928963666413917477752412858886352396999
+#'     57545635726865674683797678579481878968159298917926
+#'     57944568656815567976792667818781377892989248891319
+#'     75698651748671976285978218739618932984172914319528
+#'     56475739656758684176786979528789718163989182927419
+#'     67554889357866599146897761125791887223681299833479
+#'
+#' The total risk of this path is `315` (the starting position is still
+#' never entered, so its risk is not counted).
+#'
+#' Using the full map, *what is the lowest total risk of any path from the
+#' top left to the bottom right?*
 #'
 #' @param x some data
-#' @return For Part One, `f15a(x)` returns .... For Part Two,
-#'   `f15b(x)` returns ....
+#' @return For Part One, `f15a_dijkstra(x)` returns a dataframe of edge costs.
 #' @export
 #' @examples
-#' f15a(example_data_15())
-#' f15b()
-f15a_dijkstra <- function(x) {
+#' f15a_dijkstra(example_data_15())
+f15a_dijkstra <- function(x, repeat_5 = FALSE) {
   # strategy: dijkstra's algorithm + fake dplyr functions
   set_start <- function(df, i, j) {
     df[df[["row"]] == i & df[["col"]] == j, "cost"] <- 0
     df
   }
-
-  create_neighbor_df <- function(df) {
-    df_minimal <- df[c("row", "col")]
-    df_candidates <- df_minimal |>
-      split(seq_len(nrow(df))) |>
-      lapply(function(df) {
-        data.frame(
-          source_row = df$row,
-          source_col = df$col,
-          row = df$row + c(-1, 1,  0, 0),
-          col = df$col + c( 0, 0, -1, 1)
-        )
-      }) |>
-      f_reduce(rbind) |>
-      # filter with an inner join
-      merge(df_minimal, all = FALSE)
-
-    names(df_candidates) <- c("neigh_row", "neigh_col", "row", "col")
-    df_candidates
-  }
-
-  visit_next_node <- function(df, df_neighbors) {
+  visit_next_node <- function(df) {
     current_node <- df[1, ]
     current_node$visited <- TRUE
 
     neighbors <- current_node |>
       # find unvisited neighboring nodes
-      merge(df_neighbors) |>
-      select_cols(row = "neigh_row", col = "neigh_col") |>
-      merge(df) |>
+      f15_create_neighbor_df(max(df$row), max(df$col)) |>
+      select_cols(row = "neigh_row", col = "neigh_col", "id")
+
+    # filtering rows to avoid merge()
+    neighbors <- df[df$id %in% neighbors$id, ] |>
       filter_rows(~ visited == FALSE) |>
       # update their cost if better than current cost
       mutate_rows(
@@ -127,42 +239,55 @@ f15a_dijkstra <- function(x) {
         )
       )
 
+    changed_rows <- rbind(current_node, neighbors)
     df <- df |>
-      patch_rows(neighbors, by = c("row", "col")) |>
-      patch_rows(current_node, by = c("row", "col"))
+      filter_rows(~ ! id %in% changed_rows$id) |>
+      rbind(changed_rows)
 
     # sort so it is a priority queue
-    df[order(df$visited, df$cost), , drop = FALSE]
+    df <- df[order(df$visited, df$cost), , drop = FALSE]
+    df
   }
 
   has_visited_node <- function(df, i, j) {
     df[df$row == i & df$col == j, "visited", drop = TRUE]
   }
 
-  # x <- example_data_15()
-  df <- x |> f15_prepare_input() |> set_start(1, 1)
-  df_neighbors <- create_neighbor_df(df)
+  df <- x |> f15_prepare_input(repeat_5) |> set_start(1, 1)
   row_target <- max(df$row)
   col_target <- max(df$col)
 
   while(!has_visited_node(df, row_target, col_target)) {
-    df <- df |> visit_next_node(df_neighbors)
+    df <- df |> visit_next_node()
   }
 
   df
 }
 
+f15_create_neighbor_df <- function(df, nrows, ncols) {
+  df_minimal <- df[c("row", "col")]
+  df_candidates <- df_minimal |>
+    split(seq_len(nrow(df))) |>
+    lapply(function(df) {
+      data.frame(
+        source_row = df$row,
+        source_col = df$col,
+        row = df$row + c(-1, 1,  0, 0),
+        col = df$col + c( 0, 0, -1, 1)
+      )
+    }) |>
+    f_reduce(rbind) |>
+    filter_rows(~ row <= nrows, ~ col <= ncols, ~ 0 < row, ~ 0 < col)
 
-#' @rdname day15
-#' @export
-f15b <- function(x) {
-
+  df_candidates$id <- df_candidates$row * nrows + df_candidates$col - ncols
+  names(df_candidates) <- c("row", "col", "neigh_row", "neigh_col", "id")
+  df_candidates
 }
 
-
-f15_prepare_input <- function(x) {
+f15_prepare_input <- function(x, repeat_5 = FALSE) {
   create_dijkstra_df <- function(i, j, value) {
     data.frame(
+      id = NA_integer_,
       row = i,
       col = j,
       value,
@@ -174,15 +299,34 @@ f15_prepare_input <- function(x) {
   }
 
   # use a dataframe of indices
-  df <- x |>
+  l <- x |>
     strsplit("") |>
-    lapply(as.numeric) |>
+    lapply(as.numeric)
+
+  if (repeat_5) {
+    bump_by_n <- function(l, n) {
+      lapply(l, function(x) mod1(x + n, 9))
+    }
+    l <- l |>
+      lapply(function(li) mod1(c(li, li + 1, li + 2, li + 3, li + 4), 9))
+
+    l <- c(
+      l,
+      bump_by_n(l, 1),
+      bump_by_n(l, 2),
+      bump_by_n(l, 3),
+      bump_by_n(l, 4)
+    )
+  }
+
+  df <- l |>
     f_map2(
-      seq_along(x),
+      seq_along(l),
       function(vs, is) create_dijkstra_df(is, seq_along(vs), vs)
     ) |>
     f_reduce(rbind)
 
+  df$id <- seq_along(df$id)
   df
 }
 
