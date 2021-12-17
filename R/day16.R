@@ -316,8 +316,8 @@ f16_prepare_bits <- function(x) {
 }
 
 
-f16_parse_packets <- function(x, flatten = TRUE) {
-  do_flatten <- flatten
+f16_parse_packets <- function(x) {
+  # do_flatten <- flatten
   set_op <- function(data) {
     map <- c(
       "000" = "v_sum",
@@ -353,7 +353,7 @@ f16_parse_packets <- function(x, flatten = TRUE) {
     # bits <- subpackets
     subpackets <- substr(x, 15 + 1, 15 + length)
     rest <- substr(x, 15 + length + 1, nchar(x))
-    l <- chomp(subpackets, list())
+    l <- chomp_one(subpackets)
     list(
       subpackets = l,
       sub_length = length,
@@ -368,8 +368,11 @@ f16_parse_packets <- function(x, flatten = TRUE) {
     rest <- substr(x, 12, nchar(x))
     # bits <- rest
     # very wasteful right here
-    l <- chomp(rest)
-    l <- l[seq_len(length)]
+    l <- as.list(seq_len(length))
+    for (i in seq_len(length)) {
+      l[[i]] <- chomp_one(rest)
+      rest <- l[[i]][["rest"]]
+    }
     list(
       subpackets = l,
       sub_length = NA,
@@ -385,7 +388,52 @@ f16_parse_packets <- function(x, flatten = TRUE) {
     }
   }
 
-  chomp <- function(bits, history = list(), flatten = do_flatten) {
+  chomp_one <- function(bits) {
+    data <- list()
+    data$version <- substr(bits, 1, 3)
+    data$type <- substr(bits, 4, 6)
+    is_literal_value <- data$type == "100"
+
+    if (is_literal_value) {
+      data$rest <- substr(bits, 7, nchar(bits))
+      data$literal_value <- chomp_literal_value(data$rest)
+      data <- set_op(data)
+      data$rest <- substr(
+        bits,
+        7 + sum(nchar(data$literal_value)),
+        nchar(bits)
+      )
+      # we keep track of the rest at each step (data$rest)
+      # which maybe be different than the rest (rest) after
+      # processing subpackets
+      rest <- data$rest
+      subpackets <- list()
+    }
+
+
+    if (!is_literal_value) {
+      data <- set_op(data)
+
+      data$literal_value <- NA
+      length_type_id <- substr(bits, 7, 7)
+      data$rest <- substr(bits, 8, nchar(bits))
+
+      # x <- data$rest
+      results <- chomp_operator_packet(length_type_id, data$rest)
+      data$sub_length <- results$sub_length
+      data$num_sub <- results$num_sub
+      data$subpackets <- results$subpackets
+      subpackets <- list()
+      rest <- results$rest
+      data$rest <- results$rest
+    }
+
+    data
+
+  }
+
+
+  chomp <- function(bits, history = list()) {
     data <- list()
     data$version <- substr(bits, 1, 3)
     data$type <- substr(bits, 4, 6)
@@ -418,16 +466,16 @@ f16_parse_packets <- function(x, flatten = TRUE) {
       results <- chomp_operator_packet(length_type_id, data$rest)
       data$sub_length <- results$sub_length
       data$num_sub <- results$num_sub
-      if (flatten) {
-        subpackets <- results$subpackets
-      } else {
+      # if (flatten) {
+      #   subpackets <- results$subpackets
+      # } else {
         data$subpackets <- results$subpackets
         subpackets <- list()
-      }
+      # }
       rest <- results$rest
     }
 
-    data$packet_length <- nchar(bits) - nchar(rest)
+    # data$packet_length <- nchar(bits) - nchar(rest)
 
 
     history <- c(history, list(data), subpackets)
