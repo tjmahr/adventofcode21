@@ -164,14 +164,9 @@
 #' f17a(example_data_17())
 #' f17b()
 f17a <- function(x) {
-  x <- example_data_17()
+  # x <- example_data_17()
   target_area <- f17_helper(x)
 
-
-  coordinate <- c(0, 0)
-  velocity <- c(7, 2)
-  vx0 = velocity[1]
-  vy0 = velocity[2]
   make_probe <- function(coordinate, velocity, target) {
     # coordinate <- coordinate
     # velocity <- velocity
@@ -262,119 +257,44 @@ f17a <- function(x) {
     )
   }
 
-  p <- make_probe(c(0, 0), c(1, 1), target = target_area)
+  guess_x_velocities <- function(target) {
+    seq(2, target$x[2] + 1) |>
+      # triangular numbers = choose(n + 1, 2)
+      choose(2) |>
+      in_range(target$x) |>
+      which()
+  }
 
-  p <- make_probe(c(0, 0), c(target_area$x[2], target_area$y[2]), target = target_area)
-
-  p$step_all()
-  d <- p$get_history()
-  d
-  # then increment y and x until they maximize y
-
-
-
-
-
-
-
-
-  start_v <- c(1, 1)
-  max_y <- max(d$y)
-  better <- TRUE
-  while (better) {
-    p_inc_y <- make_probe(c(0, 0), start_v + c(0, 1), target = target_area)
-    p_inc_y$step_all()
-    h1 <- p_inc_y$get_history()
-    better <- any(h1$in_target) & max_y < max(h1$y)
-    if (better) {
-      start_v <- start_v + c(0, 1)
-      max_y <- max(d$y)
-
+  maximize_height <- function(coordinate, velocity, target) {
+    best_y <- 0
+    best_v <- 0
+    for (i in seq_len(2 * max(abs(target$y)))) {
+      message(i)
+      p_inc_y <- make_probe(
+        coordinate,
+        velocity + c(0, i),
+        target
+      )
+      p_inc_y$step_all()
+      h <- p_inc_y$get_history()
+      if (any(h$in_target) & max(h$y) > best_y) {
+        best_y <- max(h$y)
+        best_v <- i
+      }
     }
-  }
-  p <- make_probe(c(0, 0), start_v, target = target_area)
-
-
-  p$step_all()
-  p$get_history()
-  better <- TRUE
-  max_y <- max(p$get_history()["y"])
-  while (better) {
-    p_inc_x <- make_probe(c(0, 0), start_v + c(1, 0), target = target_area)
-    p_dec_x <- make_probe(c(0, 0), start_v + c(-1, 0), target = target_area)
-    p_inc_x$step_all()
-    p_dec_x$step_all()
-
-    h1 <- p_inc_x$get_history()
-    h2 <- p_dec_x$get_history()
-
-    inc_better <- any(h1$in_target) & max_y < max(h1$y)
-    dec_better <- any(h2$in_target) & max_y < max(h2$y)
-
-    if (better) {
-      start_v <- start_v + c(0, 1)
-    }
+    list(
+      best_vy = best_v,
+      best_y = best_y
+    )
   }
 
-
-
-
-  d <- p$get_history()
-  start_v <- c(7, 2)
-  max_y <- max(d$y)
-  better <- TRUE
-  while (better) {
-    p_inc_y <- make_probe(c(0, 0), start_v + c(0, 1), target = target_area)
-    p_inc_y$step_all()
-    h1 <- p_inc_y$get_history()
-    better <- any(h1$in_target) & max_y < max(h1$y)
-    if (better) {
-      start_v <- start_v + c(0, 1)
-    }
+  xs <- guess_x_velocities(target_area)
+  optimizations <- as.list(seq_along(xs))
+  for (x_i in seq_along(xs)) {
+    o <- maximize_height(c(0, 0), c(xs[x_i], 0), target_area)
+    optimizations[[x_i]] <- o
   }
 
-
-  p$step_all()
-  p$step_n(20)
-  lm(x ~ t + vx + vx*t, d) |> summary()
-  lm(y ~ 0 + vy0:t + I(t^2), d) |> summary()
-
-
-
-
-  lm(y ~ t + vy + vy*t, d) |> summary()
-
-
-  d$t * d$vx0 - .5 * d$t ^ 2
-  d$x
-  d$t * d$vx0 - .5 * d$t ^ 2
-
-  summary(m)
-  round(coef(m, 3))
-
-  m <- lm(x ~ t + t:vx , d)
-
-  round(coef(m, 2))
-  summary(m)
-  x = c + -4-vx + .5*t*vx
-
-  p$get_velocity_history()
-
-  p$step(20)
-
-  step <- function(coordinate, velocity) {
-    coordinate[1] <- coordinate[1] + velocity[1]
-    coordinate[2] <- coordinate[2] + velocity[2]
-    # wish i had a math version of this
-    velocity[1] <- velocity[1] + ifelse(velocity[1] > 0, -1, 1)
-    velocity[2] <- velocity[2] - 1
-
-  }
-
-  steps <- as.list(1:10)
-  for (i in steps) {
-    coordin
-  }
 }
 
 
