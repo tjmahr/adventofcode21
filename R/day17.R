@@ -168,8 +168,6 @@ f17a <- function(x) {
   target_area <- f17_helper(x)
 
   make_probe <- function(coordinate, velocity, target) {
-    # coordinate <- coordinate
-    # velocity <- velocity
     time <- 0
     vx0 <- velocity[1]
     vy0 <- velocity[2]
