@@ -246,7 +246,42 @@ f18a <- function(x) {
 f18b <- function(x) {
 }
 
-f18_add_snailfish <- function(x, y) {
+
+f18_snailfish_magnitude <- function(x) {
+  # Two adjacent rows with same depth is a merge-able pair
+  leaf_pairs <- which(utils::head(x$depth, -1) == utils::tail(x$depth, -1))
+
+  # Merge into left
+  for (pair in leaf_pairs) {
+    left <- x[pair, "number"] * 3
+    right <- x[pair + 1, "number"] * 2
+    x[pair, "number"] <- left + right
+    x[pair, "depth"] <- x[pair, "depth"] - 1
+  }
+
+  # Drop right
+  x <- x[-(leaf_pairs + 1), , drop = FALSE]
+
+  if (nrow(x) == 1) {
+    x[["number"]]
+  } else {
+    Recall(x)
+  }
+}
+
+
+f18_sum_snailfish <- function(x) {
+  f_pair <- function(x, y) {
+    x |>
+      f18_add_snailfish_pair(y) |>
+      f18_reduce_snailfish()
+  }
+  x |>
+    lapply(f18_snailfish_rows) |>
+    f_reduce(f_pair)
+}
+
+f18_add_snailfish_pair <- function(x, y) {
   x[["depth"]] <- x[["depth"]] + 1
   y[["depth"]] <- y[["depth"]] + 1
   new <- rbind(x, y)
@@ -361,9 +396,37 @@ f18_snailfish_rows <- function(x) {
 example_data_18 <- function(example = 1) {
   l <- list(
     a = c(
-      "[[[[[9,8],1],2],3],4]"
-
-
+      "[1,1]",
+      "[2,2]",
+      "[3,3]",
+      "[4,4]"
+    ),
+    b = c(
+      "[1,1]",
+      "[2,2]",
+      "[3,3]",
+      "[4,4]",
+      "[5,5]"
+    ),
+    c = c(
+      "[1,1]",
+      "[2,2]",
+      "[3,3]",
+      "[4,4]",
+      "[5,5]",
+      "[6,6]"
+    ),
+    d = c(
+      "[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]]",
+      "[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]",
+      "[[2,[[0,8],[3,4]]],[[[6,7],1],[7,[1,6]]]]",
+      "[[[[2,4],7],[6,[0,5]]],[[[6,8],[2,8]],[[2,1],[4,5]]]]",
+      "[7,[5,[[3,8],[1,4]]]]",
+      "[[2,[2,2]],[8,[8,1]]]",
+      "[2,9]",
+      "[1,[[[9,3],9],[[9,0],[0,7]]]]",
+      "[[[5,[7,4]],7],1]",
+      "[[[[4,2],2],6],[8,7]]"
     )
   )
   l[[example]]
