@@ -244,10 +244,27 @@ f18a <- function(x) {
 #' @rdname day18
 #' @export
 f18b <- function(x) {
-
 }
 
-f18_reduce_snailfish <- function(data) {
+f18_add_snailfish <- function(x, y) {
+  x[["depth"]] <- x[["depth"]] + 1
+  y[["depth"]] <- y[["depth"]] + 1
+  new <- rbind(x, y)
+  new[["position"]] <- seq_len(nrow(new))
+  new
+}
+
+f18_reduce_snailfish <- function(x) {
+  old <- x
+  repeat {
+    new <- f18_reduce_snailfish_once(old)
+    if (identical(old, new)) break
+    old <- new
+  }
+  new
+}
+
+f18_reduce_snailfish_once <- function(data) {
   can_explode <- function(...) {
     any(data[["depth"]] > 4)
   }
@@ -272,7 +289,27 @@ f18_reduce_snailfish <- function(data) {
     data
   }
 
-  can_split <- function(...) FALSE
+  can_split <- function(data) {
+    any(data[["number"]] > 9)
+  }
+
+
+  split_number <- function(data) {
+    i <- which(data[["number"]] > 9)[1]
+    rows <- seq_len(nrow(data))
+    pre <- data[rows < i, , drop = FALSE]
+    post <- data[rows > i, , drop = FALSE]
+
+    new_rows <- data[c(i, i), ,]
+    new_rows[["number"]][1] <- floor(new_rows[["number"]][1] / 2)
+    new_rows[["number"]][2] <- ceiling(new_rows[["number"]][2] / 2)
+    new_rows[["depth"]] <- new_rows[["depth"]] + 1
+
+    data <- rbind(pre, new_rows, post)
+    data[["position"]] <- seq_len(nrow(data))
+    data
+  }
+
   data <- if (can_explode(data)) {
     explode(data)
   } else if (can_split(data)) {
@@ -280,6 +317,7 @@ f18_reduce_snailfish <- function(data) {
   } else {
     data
   }
+
   row.names(data) <- NULL
   data
 }
