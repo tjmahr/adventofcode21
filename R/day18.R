@@ -225,25 +225,60 @@
 #'
 #' **Part Two**
 #'
-#' *(Use have to manually add this yourself.)*
+#' You notice a second question on the back of the homework assignment:
 #'
-#' *(Try using `convert_clipboard_html_to_roxygen_md()`)*
+#' What is the largest magnitude you can get from adding only two of the
+#' snailfish numbers?
+#'
+#' Note that snailfish addition is not
+#' [commutative](https://en.wikipedia.org/wiki/Commutative_property) - that
+#' is, `x + y` and `y + x` can produce different results.
+#'
+#' Again considering the last example homework assignment above:
+#'
+#'     [[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
+#'     [[[5,[2,8]],4],[5,[[9,9],0]]]
+#'     [6,[[[6,2],[5,6]],[[7,6],[4,7]]]]
+#'     [[[6,[0,7]],[0,9]],[4,[9,[9,0]]]]
+#'     [[[7,[6,4]],[3,[1,3]]],[[[5,5],1],9]]
+#'     [[6,[[7,3],[3,2]]],[[[3,8],[5,7]],4]]
+#'     [[[[5,4],[7,7]],8],[[8,3],8]]
+#'     [[9,3],[[9,9],[6,[4,9]]]]
+#'     [[2,[[7,7],7]],[[5,8],[[9,3],[0,2]]]]
+#'     [[[[5,2],5],[8,[3,7]]],[[5,[7,5]],[4,4]]]
+#'
+#' The largest magnitude of the sum of any two snailfish numbers in this
+#' list is `3993`. This is the magnitude of
+#' `[[2,[[7,7],7]],[[5,8],[[9,3],[0,2]]]]` +
+#' `[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]`, which reduces to
+#' `[[[[7,8],[6,6]],[[6,0],[7,7]]],[[[7,8],[8,8]],[[7,9],[0,6]]]]`.
+#'
+#' *What is the largest magnitude of any sum of two different snailfish
+#' numbers from the homework assignment?*
 #'
 #' @param x some data
-#' @return For Part One, `f18a(x)` returns .... For Part Two,
-#'   `f18b(x)` returns ....
+#' @return For Part One, `f18a(x)` returns the magnitude of the sum of snailfish
+#'   numbers. For Part Two, `f18b(x)` returns ....
 #' @export
 #' @examples
-#' f18a(example_data_18())
-#' f18b()
-f18a <- function(x) {
-
+#' f18a_snailfish_homework(example_data_18(5))
+#' f18b_snailfish_homework2(example_data_18(5))
+f18a_snailfish_homework <- function(x) {
+  # strategies: book-keeping, recursion
+  sum <- f18_sum_snailfish(x)
+  f18_snailfish_magnitude(sum)
 }
 
 
 #' @rdname day18
 #' @export
-f18b <- function(x) {
+f18b_snailfish_homework2 <- function(x) {
+  # not commutative so need to work both directions
+  f_rev <- function(y) f18a_snailfish_homework(rev(y))
+  g1 <- combn(x, 2, FUN = f18a_snailfish_homework)
+  g2 <- combn(x, 2, FUN = f_rev)
+  g <- c(g1, g2)
+  g
 }
 
 
@@ -251,21 +286,20 @@ f18_snailfish_magnitude <- function(x) {
   # Two adjacent rows with same depth is a merge-able pair
   leaf_pairs <- which(utils::head(x$depth, -1) == utils::tail(x$depth, -1))
 
-  # Merge into left
-  for (pair in leaf_pairs) {
-    left <- x[pair, "number"] * 3
-    right <- x[pair + 1, "number"] * 2
-    x[pair, "number"] <- left + right
-    x[pair, "depth"] <- x[pair, "depth"] - 1
-  }
+  # Merge first pair into left
+  pair <- leaf_pairs[1]
+  left <- x[pair, "number"] * 3
+  right <- x[pair + 1, "number"] * 2
+  x[pair, "number"] <- left + right
+  x[pair, "depth"] <- x[pair, "depth"] - 1
 
   # Drop right
-  x <- x[-(leaf_pairs + 1), , drop = FALSE]
+  x <- x[-(pair + 1), , drop = FALSE]
 
   if (nrow(x) == 1) {
     x[["number"]]
   } else {
-    Recall(x)
+    f18_snailfish_magnitude(x)
   }
 }
 
@@ -281,6 +315,7 @@ f18_sum_snailfish <- function(x) {
     f_reduce(f_pair)
 }
 
+
 f18_add_snailfish_pair <- function(x, y) {
   x[["depth"]] <- x[["depth"]] + 1
   y[["depth"]] <- y[["depth"]] + 1
@@ -288,6 +323,7 @@ f18_add_snailfish_pair <- function(x, y) {
   new[["position"]] <- seq_len(nrow(new))
   new
 }
+
 
 f18_reduce_snailfish <- function(x) {
   old <- x
@@ -298,6 +334,7 @@ f18_reduce_snailfish <- function(x) {
   }
   new
 }
+
 
 f18_reduce_snailfish_once <- function(data) {
   can_explode <- function(...) {
@@ -328,7 +365,6 @@ f18_reduce_snailfish_once <- function(data) {
     any(data[["number"]] > 9)
   }
 
-
   split_number <- function(data) {
     i <- which(data[["number"]] > 9)[1]
     rows <- seq_len(nrow(data))
@@ -357,6 +393,7 @@ f18_reduce_snailfish_once <- function(data) {
   data
 }
 
+
 f18_snailfish_rows <- function(x) {
   parts <- gsub(pattern = "(\\[|\\d+|,|\\])", "_\\1", x) |>
     strsplit("_") |>
@@ -369,8 +406,8 @@ f18_snailfish_rows <- function(x) {
   symbol_depths <- parts |>
     f_replace_if(function(xs) !xs %in% c("[", "]"), 0) |>
     f_replace_if(function(xs) xs == "[", 1) |>
-    f_replace_if(function(xs) xs == "]", -1) %>%
-    as.numeric() %>%
+    f_replace_if(function(xs) xs == "]", -1) |>
+    as.numeric() |>
     cumsum()
 
   number_indices <- parts |>
@@ -427,6 +464,18 @@ example_data_18 <- function(example = 1) {
       "[1,[[[9,3],9],[[9,0],[0,7]]]]",
       "[[[5,[7,4]],7],1]",
       "[[[[4,2],2],6],[8,7]]"
+    ),
+    e = c(
+      "[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]",
+      "[[[5,[2,8]],4],[5,[[9,9],0]]]",
+      "[6,[[[6,2],[5,6]],[[7,6],[4,7]]]]",
+      "[[[6,[0,7]],[0,9]],[4,[9,[9,0]]]]",
+      "[[[7,[6,4]],[3,[1,3]]],[[[5,5],1],9]]",
+      "[[6,[[7,3],[3,2]]],[[[3,8],[5,7]],4]]",
+      "[[[[5,4],[7,7]],8],[[8,3],8]]",
+      "[[9,3],[[9,9],[6,[4,9]]]]",
+      "[[2,[[7,7],7]],[[5,8],[[9,3],[0,2]]]]",
+      "[[[[5,2],5],[8,[3,7]]],[[5,[7,5]],[4,4]]]"
     )
   )
   l[[example]]
