@@ -3,13 +3,13 @@
 \name{day16}
 \alias{day16}
 \alias{f16a_sum_packet_versions}
-\alias{f16b}
+\alias{f16b_eval_packets}
 \alias{example_data_16}
 \title{Day 16: Packet Decoder}
 \usage{
 f16a_sum_packet_versions(x)
 
-f16b(x)
+f16b_eval_packets(x)
 
 example_data_16(example = 1)
 }
@@ -20,7 +20,7 @@ example_data_16(example = 1)
 1.}
 }
 \value{
-For Part One, \code{f16a(x)} returns .... For Part Two,
+For Part One, \code{f16a_sum_packet_versions(x)} returns .... For Part Two,
 \code{f16b(x)} returns ....
 }
 \description{

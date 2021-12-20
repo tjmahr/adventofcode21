@@ -423,147 +423,159 @@
 #'
 #' **Part Two**
 #'
-#' *(Use have to manually add this yourself.)*
+#' Sometimes, it\'s a good idea to appreciate just how
+#' [big]{title="The deepest parts of the ocean are about as deep as the altitude of a normal commercial aircraft, roughly 11 kilometers or 36000 feet."}
+#' the ocean is. Using the [Manhattan
+#' distance](https://en.wikipedia.org/wiki/Taxicab_geometry), how far apart
+#' do the scanners get?
 #'
-#' *(Try using `convert_clipboard_html_to_roxygen_md()`)*
+#' In the above example, scanners `2` (`1105,-1205,1229`) and `3`
+#' (`-92,-2380,-20`) are the largest Manhattan distance apart. In total,
+#' they are `1197 + 1175 + 1249 = 3621` units apart.
+#'
+#' *What is the largest Manhattan distance between any two scanners?*
 #'
 #' @param x some data
-#' @return For Part One, `f19a(x)` returns .... For Part Two,
-#'   `f19b(x)` returns ....
+#' @return For Part One and Part Two, `f19a_count_beacons(x)` returns a list of
+#'   solutions.
 #' @export
 #' @examples
-#' f19a(example_data_19())
-#' f19b()
-f19a <- function(x) {
+#' f19a_count_beacons(example_data_19())
+f19_count_beacons <- function(x) {
+  # strategy: looping to find rotation matrix and then unrotating using rotation
+  # matrix
+  s <- x |>
+    f19_read_scanner_list() |>
+    f19_normalize_scanner_list()
 
+  part1 <- s |>
+    lapply(getElement, "matrix") |>
+    lapply(as.data.frame) |>
+    f_reduce(rbind) |>
+    unique() |>
+    nrow()
+
+  part2 <- s |>
+    lapply(getElement, "origin") |>
+    f_reduce(rbind) |>
+    dist(method = "manhattan") |>
+    max()
+
+  list(part1 = part1, part2 = part2)
 }
 
 
-#' @rdname day19
-#' @export
-f19b <- function(x) {
+f19_normalize_scanner_list <- function(scanners) {
+  # We want all of the scanners to have the coordinate system so
+  # we use the first scanner as our point of reference. All of the
+  # scanners that overlap it are transformed to have the same coordinate
+  # system. These then each play the role of scanner 1 and can normalize
+  # the scanners they overlap. This lets us have s0 -> s1 -> s4 all
+  # on s0's coordinate system, like the example.
 
-}
+  # A queue of scanners to visit
+  scanners_to_check <- 1
+  visited <- numeric(0)
+  scanners[[1]][["origin"]] <- c(0, 0, 0)
 
+  while (length(scanners_to_check)) {
+    # Record current scanner and find unvisited scanners
+    current <- scanners_to_check[1]
+    scanners_to_check <- scanners_to_check[-1]
+    visited <- c(visited, current)
+    others <- setdiff(seq_along(scanners), visited)
 
-f19_helper <- function(x) {
-  x <- example_data_19()
+    left <- scanners[[current]]
 
-
-x <- c(
-"--- scanner 0 ---",
-"0,2",
-"4,1",
-"3,3",
-"",
-"--- scanner 1 ---",
-"-1,-1",
-"-5,0",
-"-2,1"
-)
-  ncol <- 3
-starts <- grep("scanner", x)
-ends <- c(starts[-1] - 2, length(x))
-
-  scanners <- f_map2(starts + 1, ends, seq) |>
-    lapply(function(xs) x[xs]) |>
-    lapply(strsplit, ",") |>
-    lapply(lapply, as.numeric) |>
-    lapply(unlist) |>
-    lapply(matrix, ncol = ncol, byrow = TRUE)
-
-  s1 <- scanners[[1]]
-  s2 <- scanners[[2]]
-
-  # we can rely on pairwise distances
-  d1 <- dist(s1)
-  d2 <- dist(s2)
-
-  aaa <- c()
-  bbb <- c()
-  j <- 1
-
-  for (j in seq_len(nrow(as.matrix(d2)))) {
-    me <- as.matrix(d1)[j, ]
-    for (i in seq_len(nrow(as.matrix(d2)))) {
-      yu <- as.matrix(d2)[i, ]
-      matches <- sum(is.element(me, yu))
-      if (matches == 12) {
-        aaa <- c(aaa, j)
-        bbb <- c(bbb, i)
+    for (s in others) {
+      right <- scanners[[s]]
+      if (nrow(f19_pair_overlaps(left[["matrix"]], right[["matrix"]]))) {
+        # Add overlapping scanners to queue
+        p <- f19_find_transform(left[["matrix"]], right[["matrix"]])
+        scanners[[s]][["matrix"]] <- p[["s2_transformed"]]
+        if (is.na(scanners[[s]][["origin"]])[1]) {
+          scanners[[s]][["origin"]] <- p[["origin"]][1, ]
+        }
+        scanners_to_check <- c(scanners_to_check, s)
       }
     }
   }
-  find_unique_points <- function(m) {
-    f <- function(xs) {
-      ifelse(length(unique(xs)) == 1, xs, 0)
-    }
-    apply(m, 2, f)
-  }
 
-  a <- (s1[aaa, ] - s2[bbb, ]) |>
-    find_unique_points()
-  b <- (s1[aaa, ] + s2[bbb, ]) |>
-    find_unique_points()
-
-  origin <- a + b
-  scanners[[2]] <- scanners[[2]] - origin
+  scanners
+}
 
 
+f19_find_transform <- function(s1, s2) {
+  matches <- f19_pair_overlaps(s1, s2)
+  x <- s1[matches[, 1], ]
+  y <- s2[matches[, 2], ]
+
+  r <- f19_find_rotations(x, y)
+  origin <- x - (y %*% r)
+
+  s2_transformed <- s2 %*% r + origin[rep(1, nrow(s2)), ]
+
+  list(
+    beacons = x,
+    rotation = r,
+    origin = origin[rep(1, nrow(s2)), ],
+    s2_transformed = s2_transformed,
+    distance_matches = matches
+  )
+}
 
 
-
-
-  s1 <- scanners[[2]]
-  s2 <- scanners[[5]]
-
-  # we can rely on pairwise distances
+f19_pair_overlaps <- function(s1, s2) {
+  # Use distance matrix to find overlapping points. The overlapping points
+  # will have the same distances among themselves regardless of coordinate
+  # system. If the same 12 values distances are found in a column of dist(A)
+  # and a column of dist(B) then that is the same point in A and B.
   d1 <- dist(s1)
   d2 <- dist(s2)
 
-  aaa <- c()
-  bbb <- c()
+  m <- matrix(0, nrow = nrow(s1), ncol = nrow(s2))
 
   for (j in seq_len(nrow(as.matrix(d1)))) {
     me <- as.matrix(d1)[j, ]
     for (i in seq_len(nrow(as.matrix(d2)))) {
       yu <- as.matrix(d2)[i, ]
       matches <- sum(is.element(me, yu))
-      message(matches)
-      if (matches == 12) {
-        aaa <- c(aaa, j)
-        bbb <- c(bbb, i)
-      }
+      m[j, i] <- matches
     }
   }
-  find_unique_points <- function(m) {
-    f <- function(xs) {
-      ifelse(length(unique(xs)) == 1, xs, 0)
+
+  which(m > 11, arr.ind = TRUE)
+}
+
+
+f19_find_rotations <- function(m1, m2) {
+  # which column of m2 is same as col or -col from m1
+  find_matching_column <- function(col, m2) {
+    f <- function(xs, ys) {
+      p1 <- length(unique(xs - ys)) == 1
+      p2 <- length(unique(xs + ys)) == 1
+      ifelse(p1, 1, ifelse(p2, -1, 0))
     }
-    apply(m, 2, f)
+    apply(m2, 2, f, ys = col)
   }
+  # find the matches for all columns of m1
+  apply(m1, 2, find_matching_column, m2 = m2)
+}
 
 
-  a <- (s1[aaa, ] - s2[bbb, ]) |>
-    find_unique_points()
-  b <- (s1[aaa, ] + s2[bbb, ]) |>
-    find_unique_points()
+f19_read_scanner_list <- function(x) {
+  starts <- grep("scanner", x)
+  ends <- c(starts[-1] - 2, length(x))
 
-  origin <- a + b
-  scanners[[2]] <- scanners[[2]] - origin
-
-
-
-
-
-
-
-
-
-  (s1[aaa, ] + s2[bbb, ])
-  plot(s1[aaa, ])
-  plot(s2[bbb, ])
-
+  f_map2(starts + 1, ends, seq) |>
+    lapply(function(xs) x[xs]) |>
+    lapply(strsplit, ",") |>
+    lapply(lapply, as.numeric) |>
+    lapply(unlist) |>
+    lapply(matrix, ncol = 3, byrow = TRUE) |>
+    lapply(function(x) {
+      list(matrix = x, origin = NA)
+    })
 }
 
 
