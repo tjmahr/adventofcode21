@@ -475,6 +475,7 @@ ends <- c(starts[-1] - 2, length(x))
   s1 <- scanners[[1]]
   s2 <- scanners[[2]]
 
+  # we can rely on pairwise distances
   d1 <- dist(s1)
   d2 <- dist(s2)
 
@@ -493,6 +494,37 @@ ends <- c(starts[-1] - 2, length(x))
       }
     }
   }
+  find_unique_points <- function(m) {
+    f <- function(xs) {
+      ifelse(length(unique(xs)) == 1, xs, 0)
+    }
+    apply(m, 2, f)
+  }
+
+  a <- (s1[aaa, ] - s2[bbb, ]) |>
+    find_unique_points()
+  b <- (s1[aaa, ] + s2[bbb, ]) |>
+    find_unique_points()
+
+  origin <- a + b
+  scanners[[2]] <- scanners[[2]] - origin
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  (s1[aaa, ] + s2[bbb, ])
+  plot(s1[aaa, ])
+  plot(s2[bbb, ])
 
 }
 
