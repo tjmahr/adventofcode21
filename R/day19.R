@@ -514,6 +514,44 @@ ends <- c(starts[-1] - 2, length(x))
 
 
 
+  s1 <- scanners[[2]]
+  s2 <- scanners[[5]]
+
+  # we can rely on pairwise distances
+  d1 <- dist(s1)
+  d2 <- dist(s2)
+
+  aaa <- c()
+  bbb <- c()
+
+  for (j in seq_len(nrow(as.matrix(d1)))) {
+    me <- as.matrix(d1)[j, ]
+    for (i in seq_len(nrow(as.matrix(d2)))) {
+      yu <- as.matrix(d2)[i, ]
+      matches <- sum(is.element(me, yu))
+      message(matches)
+      if (matches == 12) {
+        aaa <- c(aaa, j)
+        bbb <- c(bbb, i)
+      }
+    }
+  }
+  find_unique_points <- function(m) {
+    f <- function(xs) {
+      ifelse(length(unique(xs)) == 1, xs, 0)
+    }
+    apply(m, 2, f)
+  }
+
+
+  a <- (s1[aaa, ] - s2[bbb, ]) |>
+    find_unique_points()
+  b <- (s1[aaa, ] + s2[bbb, ]) |>
+    find_unique_points()
+
+  origin <- a + b
+  scanners[[2]] <- scanners[[2]] - origin
+
 
 
 
