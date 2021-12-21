@@ -152,107 +152,47 @@
 #'
 #' **Part Two**
 #'
-#' *(Use have to manually add this yourself.)*
+#' Maybe a fancy trick shot isn\'t the best idea; after all, you only have
+#' one probe, so you had better not miss.
 #'
-#' *(Try using `convert_clipboard_html_to_roxygen_md()`)*
+#' To get the best idea of what your options are for launching the probe,
+#' you need to find *every initial velocity* that causes the probe to
+#' eventually be within the target area after any step.
+#'
+#' In the above example, there are `112` different initial velocity values
+#' that meet these criteria:
+#'
+#'     23,-10  25,-9   27,-5   29,-6   22,-6   21,-7   9,0     27,-7   24,-5
+#'     25,-7   26,-6   25,-5   6,8     11,-2   20,-5   29,-10  6,3     28,-7
+#'     8,0     30,-6   29,-8   20,-10  6,7     6,4     6,1     14,-4   21,-6
+#'     26,-10  7,-1    7,7     8,-1    21,-9   6,2     20,-7   30,-10  14,-3
+#'     20,-8   13,-2   7,3     28,-8   29,-9   15,-3   22,-5   26,-8   25,-8
+#'     25,-6   15,-4   9,-2    15,-2   12,-2   28,-9   12,-3   24,-6   23,-7
+#'     25,-10  7,8     11,-3   26,-7   7,1     23,-9   6,0     22,-10  27,-6
+#'     8,1     22,-8   13,-4   7,6     28,-6   11,-4   12,-4   26,-9   7,4
+#'     24,-10  23,-8   30,-8   7,0     9,-1    10,-1   26,-5   22,-9   6,5
+#'     7,5     23,-6   28,-10  10,-2   11,-1   20,-9   14,-2   29,-7   13,-3
+#'     23,-5   24,-8   27,-9   30,-7   28,-5   21,-10  7,9     6,6     21,-5
+#'     27,-10  7,2     30,-9   21,-8   22,-7   24,-9   20,-6   6,9     29,-5
+#'     8,-2    27,-8   30,-5   24,-7
+#'
+#' *How many distinct initial velocity values cause the probe to be within
+#' the target area after any step?*
 #'
 #' @param x some data
-#' @return For Part One, `f17a(x)` returns .... For Part Two,
-#'   `f17b(x)` returns ....
+#' @return For Part One, `f17a_maximize_height_old(x)` returns the maximum height.
+#'   For Part Two, `f17b_count_velocities(x)` returns a dataframe of velocities.
 #' @export
 #' @examples
-#' f17a(example_data_17())
-#' f17b()
-f17a <- function(x) {
-  # x <- example_data_17()
-  target_area <- f17_helper(x)
-
-  make_probe <- function(coordinate, velocity, target) {
-    time <- 0
-    vx0 <- velocity[1]
-    vy0 <- velocity[2]
-    in_range <- function(x, r) {
-      r <- range(r)
-      r[1] <= x & x <= r[2]
-    }
-    in_target <- function() {
-      in_range(coordinate[1], target$x) &
-        in_range(coordinate[2], target$y)
-    }
-    is_gone <- function() {
-      past_x <- max(target$x) < coordinate[1]
-      not_going_back <- coordinate[1] <= (coordinate[1] + velocity[1])
-      x_gone_right <- past_x & not_going_back
-
-      past_x2 <- min(target$x) > coordinate[1]
-      not_going_back2 <- coordinate[1] >= (coordinate[1] + velocity[1])
-      x_gone_left <- past_x2 & not_going_back2
-      x_gone <- x_gone_left | x_gone_right
-
-      past_y <- coordinate[2] < min(target$y)
-      and_falling <- coordinate[2] >= (coordinate[2] + velocity[2])
-      y_gone <- past_y & and_falling
-
-      x_gone | y_gone
-    }
-
-    history <- data.frame(
-      t = time,
-      x = coordinate[1],
-      y = coordinate[2],
-      vx = velocity[1],
-      vy = velocity[2],
-      vx0 = vx0,
-      vy0 = vy0,
-      in_target = in_target(),
-      is_gone = is_gone()
-    )
-
-    update_history <- function() {
-      history <<- rbind(
-        history,
-        data.frame(
-          t = time,
-          x = coordinate[1],
-          y = coordinate[2],
-          vx = velocity[1],
-          vy = velocity[2],
-          vx0 = vx0,
-          vy0 = vy0,
-          in_target = in_target(),
-          is_gone = is_gone()
-        )
-      )
-    }
-
-    step <- function() {
-      time <<- time + 1
-      coordinate[1] <<- coordinate[1] + velocity[1]
-      coordinate[2] <<- coordinate[2] + velocity[2]
-      velocity[1] <<- velocity[1] - sign(velocity[1])
-      velocity[2] <<- velocity[2] - 1
-      update_history()
-      invisible(NULL)
-    }
-
-    step_n <- function(n) {
-      for (i in seq_len(n)) {
-        step()
-      }
-    }
-
-    step_all <- function() {
-      while(!is_gone()) step()
-    }
-
-    get_history <- function() history
-
-    list(
-      step = step,
-      get_history = get_history,
-      step_n = step_n,
-      step_all = step_all
-    )
+#' f17a_maximize_height_old(example_data_17())
+#' f17b_count_velocities(example_data_17())
+f17a_maximize_height_old <- function(x) {
+  # strategy: objects for the probes, good guesses using triangular numbers,
+  # grid search. very slow. this is so slow that i solved it again in part
+  # 2's function
+  in_range <- function(x, r) {
+    r <- range(r)
+    r[1] <= x & x <= r[2]
   }
 
   guess_x_velocities <- function(target) {
@@ -263,12 +203,12 @@ f17a <- function(x) {
       which()
   }
 
+  # try all of the heights for this x value
   maximize_height <- function(coordinate, velocity, target) {
     best_y <- 0
     best_v <- 0
     for (i in seq_len(2 * max(abs(target$y)))) {
-      message(i)
-      p_inc_y <- make_probe(
+      p_inc_y <- f17_make_probe(
         coordinate,
         velocity + c(0, i),
         target
@@ -281,11 +221,13 @@ f17a <- function(x) {
       }
     }
     list(
+      vx = velocity[1],
       best_vy = best_v,
       best_y = best_y
     )
   }
 
+  target_area <- f17_helper(x)
   xs <- guess_x_velocities(target_area)
   optimizations <- as.list(seq_along(xs))
   for (x_i in seq_along(xs)) {
@@ -293,13 +235,175 @@ f17a <- function(x) {
     optimizations[[x_i]] <- o
   }
 
+  optimizations |>
+    lapply(getElement, "best_y") |>
+    unlist(max) |>
+    unique()
 }
-
 
 #' @rdname day17
 #' @export
-f17b <- function(x) {
+f17b_count_velocities <- function(x) {
+  # strategy: find times when x velocity is in the target, find times when y
+  # velocity is in the target, merge the times together to get x,y pairs.
+  in_range <- function(x, r) {
+    r <- range(r)
+    r[1] <= x & x <= r[2]
+  }
 
+  # x <- example_data_17()
+  target <- f17_helper(x)
+
+  # find when x velocity would hit the target
+  fx2 <- function(n, stalling_ceiling) {
+    steps <- cumsum(rev(seq_len(n)))
+    times <- which(in_range(steps, target$x))
+    stalled <- in_range(steps[n], target$x)
+
+    # add extra rows for longest y path
+    if (stalled) {
+      times <- seq(min(times), stalling_ceiling)
+    }
+
+    if (length(times)) {
+      data.frame(
+        vx = n,
+        times = times,
+        stalled_in_x = stalled
+      )
+    } else {
+      data.frame(vx = numeric(0), times = numeric(0))
+    }
+  }
+
+  # find when y velocity would hit the target
+  fy2 <- function(n) {
+    steps <- seq(n, min(target$y) - 10) |> cumsum()
+    highest <- max(steps)
+    times <- which(in_range(steps, target$y))
+    # stalled <- in_range(steps[n], target$x)
+    if (length(times)) {
+      data.frame(
+        vy = n,
+        times = times,
+        highest = highest
+      )
+    } else {
+      data.frame(vy = numeric(0), times = numeric(0), highest = numeric(0))
+    }
+  }
+
+  y_candidates <- seq(min(target$y) - 1, abs(min(target$y)))
+  vy_grid <- y_candidates |>
+    lapply(fy2) |>
+    f_reduce(rbind)
+  longest_time <- max(vy_grid$times)
+
+  x_candidates <- seq(1, max(target$x))
+  vx_grid <- x_candidates |>
+    lapply(fx2, stalling_ceiling = longest_time) |>
+    f_reduce(rbind)
+
+  m <- merge(vx_grid, vy_grid)
+
+  m <- unique(m[c("vx", "vy", "highest")])
+  m
+}
+
+
+
+
+
+
+f17_make_probe <- function(coordinate, velocity, target) {
+  time <- 0
+  vx0 <- velocity[1]
+  vy0 <- velocity[2]
+
+  in_range <- function(x, r) {
+    r <- range(r)
+    r[1] <= x & x <= r[2]
+  }
+
+  in_target <- function() {
+    in_range(coordinate[1], target$x) &
+      in_range(coordinate[2], target$y)
+  }
+
+  is_gone <- function() {
+    past_x <- max(target$x) < coordinate[1]
+    not_going_back <- coordinate[1] <= (coordinate[1] + velocity[1])
+    x_gone_right <- past_x & not_going_back
+
+    past_x2 <- min(target$x) > coordinate[1]
+    not_going_back2 <- coordinate[1] >= (coordinate[1] + velocity[1])
+    x_gone_left <- past_x2 & not_going_back2
+    x_gone <- x_gone_left | x_gone_right
+
+    past_y <- coordinate[2] < min(target$y)
+    and_falling <- coordinate[2] >= (coordinate[2] + velocity[2])
+    y_gone <- past_y & and_falling
+
+    x_gone | y_gone
+  }
+
+  history <- data.frame(
+    t = time,
+    x = coordinate[1],
+    y = coordinate[2],
+    vx = velocity[1],
+    vy = velocity[2],
+    vx0 = vx0,
+    vy0 = vy0,
+    in_target = in_target(),
+    is_gone = is_gone()
+  )
+
+  update_history <- function() {
+    history <<- rbind(
+      history,
+      data.frame(
+        t = time,
+        x = coordinate[1],
+        y = coordinate[2],
+        vx = velocity[1],
+        vy = velocity[2],
+        vx0 = vx0,
+        vy0 = vy0,
+        in_target = in_target(),
+        is_gone = is_gone()
+      )
+    )
+  }
+
+  step <- function() {
+    time <<- time + 1
+    coordinate[1] <<- coordinate[1] + velocity[1]
+    coordinate[2] <<- coordinate[2] + velocity[2]
+    velocity[1] <<- velocity[1] - sign(velocity[1])
+    velocity[2] <<- velocity[2] - 1
+    update_history()
+    invisible(NULL)
+  }
+
+  step_n <- function(n) {
+    for (i in seq_len(n)) {
+      step()
+    }
+  }
+
+  step_all <- function() {
+    while(!is_gone()) step()
+  }
+
+  get_history <- function() history
+
+  list(
+    step = step,
+    get_history = get_history,
+    step_n = step_n,
+    step_all = step_all
+  )
 }
 
 
@@ -334,7 +438,6 @@ example_data_17 <- function(example = 1) {
   l <- list(
     a = c(
       "target area: x=20..30, y=-10..-5"
-
     )
   )
   l[[example]]

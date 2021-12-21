@@ -242,6 +242,7 @@ f21b_play_quantum_game <- function(x) {
   )
 
   data <- list(active = setup, wins = NULL)
+
   while (nrow(data$active)) {
     data <- data |>
       update_active_player()
