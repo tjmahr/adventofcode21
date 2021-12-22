@@ -196,11 +196,62 @@ Decode the structure of your hexadecimal-encoded BITS transmission;
 
 \strong{Part Two}
 
-\emph{(Use have to manually add this yourself.)}
+\strong{Part Two}
+Now that you have the structure of your transmission decoded, you can
+calculate the value of the expression it represents.
 
-\emph{(Try using \code{convert_clipboard_html_to_roxygen_md()})}
+Literal values (type ID \code{4}) represent a single number as described
+above. The remaining type IDs are more interesting:
+\itemize{
+\item Packets with type ID \code{0} are \emph{sum} packets - their value is the sum
+of the values of their sub-packets. If they only have a single
+sub-packet, their value is the value of the sub-packet.
+\item Packets with type ID \code{1} are \emph{product} packets - their value is the
+result of multiplying together the values of their sub-packets. If
+they only have a single sub-packet, their value is the value of the
+sub-packet.
+\item Packets with type ID \code{2} are \emph{minimum} packets - their value is the
+minimum of the values of their sub-packets.
+\item Packets with type ID \code{3} are \emph{maximum} packets - their value is the
+maximum of the values of their sub-packets.
+\item Packets with type ID \code{5} are \emph{greater than} packets - their value is
+\emph{1} if the value of the first sub-packet is greater than the value
+of the second sub-packet; otherwise, their value is \emph{0}. These
+packets always have exactly two sub-packets.
+\item Packets with type ID \code{6} are \emph{less than} packets - their value is
+\emph{1} if the value of the first sub-packet is less than the value of
+the second sub-packet; otherwise, their value is \emph{0}. These packets
+always have exactly two sub-packets.
+\item Packets with type ID \code{7} are \emph{equal to} packets - their value is \emph{1}
+if the value of the first sub-packet is equal to the value of the
+second sub-packet; otherwise, their value is \emph{0}. These packets
+always have exactly two sub-packets.
+}
+
+Using these rules, you can now work out the value of the outermost
+packet in your BITS transmission.
+
+For example:
+\itemize{
+\item \code{C200B40A82} finds the sum of \code{1} and \code{2}, resulting in the value
+\code{3}.
+\item \verb{04005AC33890} finds the product of \code{6} and \code{9}, resulting in the
+value \code{54}.
+\item \verb{880086C3E88112} finds the minimum of \code{7}, \code{8}, and \code{9}, resulting
+in the value \code{7}.
+\item \code{CE00C43D881120} finds the maximum of \code{7}, \code{8}, and \code{9}, resulting
+in the value \code{9}.
+\item \code{D8005AC2A8F0} produces \code{1}, because \code{5} is less than \code{15}.
+\item \code{F600BC2D8F} produces \code{0}, because \code{5} is not greater than \code{15}.
+\item \verb{9C005AC2F8F0} produces \code{0}, because \code{5} is not equal to \code{15}.
+\item \verb{9C0141080250320F1802104A08} produces \code{1}, because \code{1} + \code{3} =
+\code{2} \* \code{2}.
+}
+
+\emph{What do you get if you evaluate the expression represented by your
+hexadecimal-encoded BITS transmission?}
 }
 \examples{
-f16a_sum_packet_versions(example_data_16())
-f16b()
+# f16a_sum_packet_versions(example_data_16())
+# f16b()
 }

@@ -1,3 +1,6 @@
+#' @importFrom stats aggregate dist
+#' @importFrom utils combn head str tail
+NULL
 
 #' `x %% m` but with a value between (0, m]
 #'
