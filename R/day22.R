@@ -218,11 +218,11 @@
 #'
 #' @param x some data
 #' @return For Part One, `f22a_flip_cubes_small(x)` returns the number of on
-#'   cubes. For Part Two, `f22b(x)` returns ....
+#'   cubes. For Part Two, `f22b_flip_cubes_big(x)` returns the number of on
+#'   cubes.
 #' @export
 #' @examples
 #' f22a_flip_cubes_small(example_data_22())
-#' f22b()
 f22a_flip_cubes_small <- function(x) {
   # strategy: matrix subsetting on a 3d array
   d <- x |>
@@ -243,14 +243,15 @@ f22a_flip_cubes_small <- function(x) {
   }
 
   sum(a)
-
 }
 
 
 #' @rdname day22
 #' @export
 f22b_flip_cubes_big <- function(x) {
-  # future::plan("multisession")
+  # I solved this one by adding breaking new cubes in to sub cubes that did not
+  # overlap with any existing ones. A better solution would have been to add the
+  # cubes and subtract the overlapping regions.
 
   seq_range <- function(r) seq(r[1], r[2])
 
@@ -289,6 +290,8 @@ f22b_flip_cubes_big <- function(x) {
     min2_in | max2_in | min1_in | max1_in
   }
 
+  # add regions that are setdiff(current, candidate) if "on"
+  # add regions that are setdiff(candidate, current) if "off"
   compare_rows <- function(current, candidate) {
     if (current$action == "on" && candidate$action == "on") {
       new_rows <- find_new_on_regions(current, candidate)
@@ -337,17 +340,36 @@ f22b_flip_cubes_big <- function(x) {
     d
   }
 
-  # x <- example_data_22(2)
-  d <- x |>
-    f22_prepare_input()
+  d <- f22_prepare_input(x)
   d$too_big <- NULL
 
-
+  # for faster rbind()
   f_do_call <- function(x, f, ...) {
     do.call(f, x, ...)
   }
+
   # We are going to successively add nonoverlaping regions to the ranges
-  # dataframe from the candidates datafram
+  # dataframe from the candidates dataframe.
+
+  #         ;;;;;;;;; .....
+  #          old x    new x
+  #         ┌─────────────┐ .
+  #         │             │ . new y
+  #   ┌─────┼────────┐    │
+  #   │  /  │  /  /  │    │ ;
+  #   │ /  /│ /  /  /│    │ ;
+  #   │/  / │/  /  / │    │ ; old y
+  #   │  /  │  /  /  │    │ ;
+  #   │ /  /└────────┼────┘ ;
+  #   │/  /  /  /    │
+  #   │  /  /  /  /  │
+  #   └──────────────┘
+  #         ;;;;;;;;; .....
+  #          old x    new x
+  #
+  #   add two new regions:
+  #     new x, old y + new y
+  #     old x, new y
   ranges <- d[1, ]
   candidates <- d[-1, ]
   steps <- seq_len(nrow(candidates))
@@ -367,7 +389,6 @@ f22b_flip_cubes_big <- function(x) {
         ~ range_overlap(y1, y2, candidate$y1, candidate$y2),
         ~ range_overlap(z1, z2, candidate$z1, candidate$z2)
       )
-
 
     if (candidate$action == "off") {
       ranges <- ranges |>
@@ -400,11 +421,6 @@ f22b_flip_cubes_big <- function(x) {
   span2 <- (ranges$y2 - ranges$y1) + 1
   span3 <- (ranges$z2 - ranges$z1) + 1
   sum(span1 * span2 * span3)
-}
-
-f22_scratch <- function(x) {
-
-
 }
 
 

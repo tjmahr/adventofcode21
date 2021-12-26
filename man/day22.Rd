@@ -21,7 +21,8 @@ example_data_22(example = 1)
 }
 \value{
 For Part One, \code{f22a_flip_cubes_small(x)} returns the number of on
-cubes. For Part Two, \code{f22b(x)} returns ....
+cubes. For Part Two, \code{f22b_flip_cubes_big(x)} returns the number of on
+cubes.
 }
 \description{
 \href{https://adventofcode.com/2021/day/22}{Reactor Reboot}
@@ -239,5 +240,4 @@ Afterward, considering all cubes, \emph{how many cubes are on?}
 }
 \examples{
 f22a_flip_cubes_small(example_data_22())
-f22b()
 }
