@@ -378,40 +378,5 @@
 #' Using the initial configuration from the full diagram, *what is the
 #' least energy required to organize the amphipods?*
 #'
-#' @param x some data
-#' @return For Part One, `f23a(x)` returns .... For Part Two,
-#'   `f23b(x)` returns ....
-#' @export
-#' @examples
-#' f23a(example_data_23())
-#' f23b()
-f23a <- function(x) {
-
-}
-
-
-#' @rdname day23
-#' @export
-f23b <- function(x) {
-
-}
-
-
-f23_helper <- function(x) {
-
-}
-
-
-#' @param example Which example data to use (by position or name). Defaults to
-#'   1.
-#' @rdname day23
-#' @export
-example_data_23 <- function(example = 1) {
-  l <- list(
-    a = c(
-
-
-    )
-  )
-  l[[example]]
-}
+#' **Note: solved by hand**
+NULL

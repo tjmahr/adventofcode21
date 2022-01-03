@@ -57,6 +57,8 @@ puzzles.
 
 -   00a/b *Write puzzle description like this:* Period separated strategies. Enumerated.
 
+-   23a/b *Solve a tile sliding game:* No code. Solved by hand (see inst/notes-day-22b-moves.R).
+
 -   25a/b *Simulate movement in a grid that wraps around:* Matrix subsetting. Mod1.
 
 
