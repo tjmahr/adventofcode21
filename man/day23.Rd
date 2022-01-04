@@ -2,27 +2,7 @@
 % Please edit documentation in R/day23.R
 \name{day23}
 \alias{day23}
-\alias{f23a}
-\alias{f23b}
-\alias{example_data_23}
 \title{Day 23: Amphipod}
-\usage{
-f23a(x)
-
-f23b(x)
-
-example_data_23(example = 1)
-}
-\arguments{
-\item{x}{some data}
-
-\item{example}{Which example data to use (by position or name). Defaults to
-1.}
-}
-\value{
-For Part One, \code{f23a(x)} returns .... For Part Two,
-\code{f23b(x)} returns ....
-}
 \description{
 \href{https://adventofcode.com/2021/day/23}{Amphipod}
 }
@@ -385,8 +365,6 @@ amphipods is \code{44169}:\preformatted{#############
 
 Using the initial configuration from the full diagram, \emph{what is the
 least energy required to organize the amphipods?}
-}
-\examples{
-f23a(example_data_23())
-f23b()
+
+\strong{Note: solved by hand}
 }
