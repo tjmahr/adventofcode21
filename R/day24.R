@@ -145,6 +145,7 @@ f24b <- function(x) {
 
 
 f24_helper <- function(x) {
+  # create an arithmetic logic unit
   alu <- function(data) {
     vars <- list(
       w = 0,
@@ -158,43 +159,218 @@ f24_helper <- function(x) {
       data <<- data[-1]
       n
     }
+    show_state <- function() {
+      list(vars = vars, data = data)
+    }
     inp <- function(var) {
       vars[[var]] <<- next_data()
     }
+    resolve_v2 <- function(x) {
+      if (is.character(x)) vars[[x]] else x
+    }
     add <- function(v1, v2) {
-      vars[[v1]] <<- vars[[v1]] + vars[[v2]]
+      vars[[v1]] <<- vars[[v1]] + resolve_v2(v2)
     }
     mul <- function(v1, v2) {
-      vars[[v1]] <<- vars[[v1]] * vars[[v2]]
+      vars[[v1]] <<- vars[[v1]] * resolve_v2(v2)
     }
     div <- function(v1, v2) {
-      q <- vars[[v1]] / vars[[v2]]
+      q <- vars[[v1]] / resolve_v2(v2)
       q <- if (q < 0) ceiling(q) else floor(q)
       vars[[v1]] <<- q
     }
     mod <- function(v1, v2) {
-      vars[[v1]] <<- vars[[v1]] %% vars[[v2]]
+      vars[[v1]] <<- vars[[v1]] %% resolve_v2(v2)
     }
     eql <- function(v1, v2) {
-      vars[[v1]] <<- as.numeric(vars[[v1]] == vars[[v2]])
+      vars[[v1]] <<- as.numeric(vars[[v1]] == resolve_v2(v2))
     }
 
     list(
-      add = add, mul = mul, div = div,
-      mod = mod, eql = eql, inp = inp
+      inp = inp,
+      add = add,
+      mul = mul,
+      div = div,
+      mod = mod,
+      eql = eql,
+      show_state = show_state
     )
   }
 
   x <- example_data_24()
 
-  a <- alu(1)
-  x
+  str_gsub <- function(string, pattern, replacement) {
+    gsub(pattern, replacement, string)
+  }
 
-  x <- gsub(" (w|x|y|x)", " \"\\1\"", x)
-  x <- gsub("inp (.)", "inp(\\1)", x)
-  gsub("(mod|div|add|mul|eql) (.) (.+)", "\\1(", x)
+  x <- f24_read_input()
+  xs <- x |>
+    # quote variable names
+    str_gsub(" (w|x|y|z)", " \"\\1\"") |>
+    # handle 1-arg functions
+    str_gsub("inp (\".\")", "inp(\\1)") |>
+    str_gsub("(mod|div|add|mul|eql) (\".\") (.+)", "\\1(\\2, \\3)")
+
+
+
+  digits <- 93579246899999 |>
+    as.character() |>
+    strsplit("") |>
+    unlist() |>
+    as.numeric()
+
+  digits <- 21112211322991 |>
+    as.character() |>
+    strsplit("") |>
+    unlist() |>
+    as.numeric()
+
+  digits <- sample(9, 14, replace = TRUE)
+
+  # first 2
+  digits[1] <- 9
+  digits[2] <- 9
+  digits[3] <- 9
+  digits[4] <- digits[3]
+  digits[5] <- 5
+  digits[6] <- digits[5] + 4
+  digits[7] <- 6
+  digits[8] <- 9
+  digits[9] <- 9
+  digits[10] <- 1
+  digits[11] <- 9
+  w1 <- digits[1]
+  w2 <- digits[2]
+  w3 <- digits[3]
+  w4 <- digits[4]
+  w5 <- digits[5]
+  w6 <- digits[6]
+  w7 <- digits[7]
+  w8 <- digits[8]
+  w9 <- digits[9]
+  w10 <- digits[10]
+  w11 <- digits[11]
+  w12 <- digits[12]
+  w13 <- digits[13]
+  w14 <- digits[14]
+
+
+# writeLines(paste(seq_along(xs), xs))
+
+  a <- alu(digits)
+
+  for (command_i in seq_along(xs)) {
+    eval(parse(text = xs[command_i]), envir = a)
+    x <- a$show_state()[["vars"]][["x"]]
+    y <- a$show_state()[["vars"]][["y"]]
+    z <- a$show_state()[["vars"]][["z"]]
+    if (command_i == 54) {
+      stopifnot(z == (26 * (26 * (10 + w1) + w2 + 5)) + w3 + 12)
+    }
+    if (command_i == 60) {
+      stopifnot(x == w3)
+    }
+    if (command_i == 59) {
+      stopifnot(z == (26 * (10 + w1) + w2 + 5))
+    }
+    if (command_i == 62) {
+      stopifnot(x == as.numeric(w3 != w4))
+    }
+    if (command_i == 67) {
+      stopifnot(y == 1 + 25 * (w3 != w4))
+      stopifnot(z == (26 * (10 + w1) + w2 + 5) * (1 + 25 * (w3 != w4)))
+    }
+    if (command_i == 72) {
+      stopifnot(y == (w4 + 12) * (w3 != w4))
+      z_guess <- ((26 * (10 + w1) + w2 + 5) * (1 + 25 * (w3 != w4))) +
+        (w4 + 12) * (w3 != w4)
+      stopifnot(z == z_guess)
+    }
+    if (command_i == 80) {
+      stopifnot(x == 1)
+    }
+    if (command_i == 85) {
+      z_guess2 <- (((((26 * (10 + w1) + w2 + 5) * (1 + 25 * (w3 != w4)))) + ((w4 + 12) * (w3 != w4))) * 26)
+      stopifnot(y == 26)
+      stopifnot(z == z_guess2)
+    }
+    if (command_i == 90) {
+      # stopifnot(y == 26)
+      z_guess3 <- ((((((26 * (10 + w1) + w2 + 5) * (1 + 25 * (w3 != w4)))) + ((w4 + 12) * (w3 != w4))) * 26) + w5 + 6)
+      stopifnot(z == z_guess3)
+    }
+    if (command_i == 95) {
+      stopifnot(z == ((((26 * (10 + w1) + w2 + 5) * (1 + 25 * (w3 != w4)))) + ((w4 + 12) * (w3 != w4))))
+    }
+    if (command_i == 98) {
+      stopifnot(x == (w5 + 4 != w6))
+    }
+    if (command_i == 108) {
+      z6 <- ((((((26 * (10 + w1) + w2 + 5) * (1 + 25 * (w3 != w4)))) + ((w4 + 12) * (w3 != w4))) * ((25 * ((w5 + 4) != w6)) + 1)) + ((w6 + 4) * ((w5 + 4) != w6)))
+      stopifnot(y == (w6 + 4) * ((w5 + 4) != w6))
+      stopifnot(z == z6)
+      # stopifnot(z == z6)
+      # message(z)
+      # message(26 * w1 + w2 + 265)
+    }
+    if (command_i == 112) {
+      stopifnot(x == w2 + 5)
+    }
+    if (command_i == 116) {
+      stopifnot(x == 1)
+    }
+    if (command_i == 126) {
+      z7 <- ((26 * z6) + (w7 + 15))
+      stopifnot(z == z7)
+    }
+    if (command_i == 139) {
+      zg <- ((25 * (w8 != (w7 + 3))) + 1) * z6
+      stopifnot(z == zg)
+    }
+    if (command_i == 144) {
+      z8 <- ((((25 * (w8 != (w7 + 3))) + 1) * z6) + (w8 + 3) * (w8 != (w7 + 3)))
+      stopifnot(z == z8)
+    }
+    if (command_i == 162) {
+      z9 <- ((z8 * 26) + w9 + 7)
+      stopifnot(z == z9)
+    }
+    if (command_i == 180) {
+      z10 <- (26 * z9 + w10 + 11)
+      stopifnot(z == z10)
+    }
+    if (command_i == 198) {
+      z11 <- (z9 * (25 * (w11 != w10 + 8) + 1)) + (w11 + 2) * (w11 != w10 + 8)
+      stopifnot(z == z11)
+    }
+  }
+
+  str(a$show_state())
+
+  # g <- expand.grid(w8 = 1:9, w9 = 1:9, w10 = 1:9, w11 = 1:9, w12 = 1:9, w13 = 1:9, w14 = 1:9)
+  # g <- head(g, 10000)
+  # for (row_i in seq_len(nrow(g))) {
+  #   d <- c(digits[1:7], unlist(g[row_i, 1:7]))
+  #   a <- alu(d)
+  #   for (command_i in seq_along(xs)) {
+  #     eval(parse(text = xs[command_i]), envir = a)
+  #     z <- a$show_state()[["vars"]][["z"]]
+  #   }
+  #   if (z == 0) stop(row_i)
+  # }
+
+
+
+  eval(parse(text = xs[2]), envir = a)
+  str(a$show_state())
+
 }
 
+
+f24_read_input <- function() {
+  path <- system.file("input24.txt", package = "adventofcode21")
+  readLines(path)
+}
 
 #' @param example Which example data to use (by position or name). Defaults to
 #'   1.

@@ -1,0 +1,400 @@
+inp w
+  mul x 0
+  add x z
+  mod x 26
+  div z 1
+  add x 10
+x is 10
+
+  eql x w
+  eql x 0
+x is 1
+
+  mul y 0
+  add y 25
+y is 25
+
+  mul y x
+  add y 1
+y is 26
+
+  mul z y
+  mul y 0
+y is 0
+
+  add y w
+  add y 10
+  mul y x
+  add z y
+
+w is w
+x is 1
+y is 10 + w
+z is y
+
+
+  inp w2
+  mul x 0
+  add x z
+  mod x 26
+x is 10 + w1 mod 26
+x is z + 1
+
+  div z 1
+  add x 13
+x is z + 14
+
+  eql x w2
+  eql x 0
+x is 1
+
+  mul y 0
+  add y 25
+  mul y x
+  add y 1
+y is 26
+
+  mul z y
+z is 26 * (10 + w1)
+
+  mul y 0
+  add y w2
+  add y 5
+  mul y x
+
+  add z y
+x is 1
+y is w2 + 5
+z is 26 * (10 + w1) + w2 + 5
+
+
+
+  inp w3
+  mul x 0
+  add x z
+  mod x 26
+  div z 1
+  add x 15
+x is (26 * (10 + w1) + w2 + 5) %% 26 + 15
+x is w2 + 5) %% 26 + 15
+x is w2 + 20
+
+  eql x w3
+  eql x 0
+x is 1
+
+  mul y 0
+  add y 25
+  mul y x
+  add y 1
+y is 26
+
+  mul z y
+z is 26 * (26 * (10 + w1) + w2 + 5)
+  mul y 0
+  add y w3
+  add y 12
+  mul y x
+y is w3 + 12
+  add z y
+z is (26 * (26 * (10 + w1) + w2 + 5)) + w3 + 12
+
+
+  inp w4
+  mul x 0
+  add x z
+  mod x 26
+x is w3 + 12
+
+  div z 26
+z is (26 * (10 + w1) + w2 + 5)
+
+  add x -12
+x is w3
+
+  eql x w4
+  eql x 0
+x is (w3 != w4)
+
+  mul y 0
+  add y 25
+  mul y x
+  add y 1
+y is 1 + 25 * (w3 != w4)
+
+  mul z y
+z is (26 * (10 + w1) + w2 + 5) * (1 + 25 * (w3 != w4)))
+
+  mul y 0
+  add y w4
+  add y 12
+  mul y x
+y is (w4 + 12) * (w3 != w4)
+  add z y
+(26 * (10 + w1) + w2 + 5) + (w4 + 12) * (w3 != w4)
+
+(((26 * (10 + w1) + w2 + 5) * (1 + 25 * (w3 != w4)))) + ((w4 + 12) * (w3 != w4)))
+
+
+
+(73) inp w5
+  mul x 0
+  add x z
+  mod x 26
+x is (((26 * (10 + w1) + w2 + 5) * (1 + 25 * (w3 != w4))) +
+        (w4 + 12) * (w3 != w4)) mod 26
+x is  (w4 + 12) * (w3 != w4)
+
+  div z 1
+  add x 14
+  eql x w5
+  (80) eql x 0
+x is 1
+
+  mul y 0
+  add y 25
+  mul y x
+  add y 1
+y is 26
+
+  (85)  mul z y
+z is (((26 * (10 + w1) + w2 + 5) * (1 + 25 * (w3 != w4)))) + ((w4 + 12) * (w3 != w4))) * 26
+
+  mul y 0
+  add y w5
+  add y 6
+  mul y x
+  (90) add z y
+z is ((((((26 * (10 + w1) + w2 + 5) * (1 + 25 * (w3 != w4)))) + ((w4 + 12) * (w3 != w4))) * 26) + w5 + 6)
+
+
+91 inp("w6")
+92 mul("x", 0)
+93 add("x", "z")
+94 mod("x", 26)
+95 div("z", 26)
+x is w5 + 6
+z is ((((26 * (10 + w1) + w2 + 5) * (1 + 25 * (w3 != w4)))) + ((w4 + 12) * (w3 != w4)))
+
+96 add("x", -2)
+97 eql("x", "w6")
+98 eql("x", 0)
+x is (w5 + 4 != w6)
+
+99 mul("y", 0)
+100 add("y", 25)
+101 mul("y", "x")
+102 add("y", 1)
+y is ((25 * ((w5 + 4) != w6)) + 1)
+
+103 mul("z", "y")
+(((((26 * (10 + w1) + w2 + 5) * (1 + 25 * (w3 != w4)))) + ((w4 + 12) * (w3 != w4))) * ((25 * ((w5 + 4) != w6)) + 1))
+
+104 mul("y", 0)
+105 add("y", "w6")
+106 add("y", 4)
+107 mul("y", "x")
+y is ((w6 + 4) * ((w5 + 4) != w6))
+
+108 add("z", "y")
+((((((26 * (10 + w1) + w2 + 5) * (1 + 25 * (w3 != w4)))) + ((w4 + 12) * (w3 != w4))) * ((25 * ((w5 + 4) != w6)) + 1)) + ((w6 + 4) * ((w5 + 4) != w6)))
+
+((((((26 * (10 + w1) + w2 + 5) * (1 + 25 * (w3 != w4)))) + ((w4 + 12) * (w3 != w4))) * ((25 * ((w5 + 4) != w6)) + 1)) + ((w6 + 4) * ((w5 + 4) != w6)))
+
+((((((26 * (10 + w1) + w2 + 5) * (1 + 25 * (w3 != w4)))) + ((w4 + 12) * (w3 != w4))) * ((25 * ((w5 + 4) != w6)) + 1)) + ((w6 + 4) * ((w5 + 4) != w6)))
+
+
+109 inp("w7")
+110 mul("x", 0)
+111 add("x", "z")
+112 mod("x", 26)
+z6 %% 26
+113 div("z", 1)
+114 add("x", 13)
+w2 + 5 + 13
+115 eql("x", "w7")
+116 eql("x", 0)
+x = 1
+
+117 mul("y", 0)
+118 add("y", 25)
+119 mul("y", "x")
+120 add("y", 1)
+y = 26
+121 mul("z", "y")
+26 * z6
+122 mul("y", 0)
+123 add("y", "w7")
+124 add("y", 15)
+125 mul("y", "x")
+126 add("z", "y")
+(26 * z6) + (w7 + 15)
+
+
+127 inp("w8")
+128 mul("x", 0)
+129 add("x", "z")
+130 mod("x", 26)
+(w7 + 15)
+131 div("z", 26)
+z6
+132 add("x", -12)
+(w7 + 3)
+133 eql("x", "w")
+134 eql("x", 0)
+w8 != (w7 + 3)
+
+135 mul("y", 0)
+136 add("y", 25)
+137 mul("y", "x")
+
+138 add("y", 1)
+139 mul("z", "y")
+((25 * (w8 != (w7 + 3))) + 1) * z6
+140 mul("y", 0)
+141 add("y", "w8")
+142 add("y", 3)
+143 mul("y", "x")
+(w8 + 3) * (w8 != (w7 + 3))
+144 add("z", "y")
+((((25 * (w8 != (w7 + 3))) + 1) * z6) + ((w8 + 3) * (w8 != (w7 + 3))))
+
+
+145 inp("w9")
+146 mul("x", 0)
+147 add("x", "z")
+148 mod("x", 26)
+if w8 == w7 + 3,
+x = w2 + 5
+
+149 div("z", 1)
+150 add("x", 15)
+w2 + 20
+151 eql("x", "w")
+152 eql("x", 0)
+x = 1
+153 mul("y", 0)
+154 add("y", 25)
+155 mul("y", "x")
+156 add("y", 1)
+y = 26
+157 mul("z", "y")
+z = z8 * 26
+
+158 mul("y", 0)
+159 add("y", "w9")
+160 add("y", 7)
+w9 + 7
+161 mul("y", "x")
+162 add("z", "y")
+z9 <- ((z8 * 26) + w9 + 7)
+
+163 inp("w10")
+164 mul("x", 0)
+165 add("x", "z")
+166 mod("x", 26)
+x = w9 + 7
+167 div("z", 1)
+168 add("x", 11)
+x = w9 + 18
+
+169 eql("x", "w")
+170 eql("x", 0)
+x = 1
+
+171 mul("y", 0)
+172 add("y", 25)
+173 mul("y", "x")
+174 add("y", 1)
+y = 26
+175 mul("z", "y")
+z = z9 * 26
+176 mul("y", 0)
+177 add("y", "w")
+178 add("y", 11)
+179 mul("y", "x")
+180 add("z", "y")
+z10 <- (26 * z9 + w10 + 11)
+
+181 inp("w11")
+182 mul("x", 0)
+183 add("x", "z")
+184 mod("x", 26)
+185 div("z", 26)
+z = z9
+x = w10 + 11
+186 add("x", -3)
+x = w10 + 8
+187 eql("x", "w")
+x = w11 != w10 + 8
+188 eql("x", 0)
+189 mul("y", 0)
+190 add("y", 25)
+191 mul("y", "x")
+192 add("y", 1)
+193 mul("z", "y")
+z9 * (25 * (w11 != w10 + 8) + 1)
+
+194 mul("y", 0)
+195 add("y", "w")
+196 add("y", 2)
+w11 + 2
+197 mul("y", "x")
+198 add("z", "y")
+
+199 inp("w12")
+200 mul("x", 0)
+201 add("x", "z")
+202 mod("x", 26)
+203 div("z", 26)
+204 add("x", -13)
+205 eql("x", "w")
+206 eql("x", 0)
+207 mul("y", 0)
+208 add("y", 25)
+209 mul("y", "x")
+210 add("y", 1)
+211 mul("z", "y")
+212 mul("y", 0)
+213 add("y", "w")
+214 add("y", 12)
+215 mul("y", "x")
+216 add("z", "y")
+
+217 inp("w13")
+218 mul("x", 0)
+219 add("x", "z")
+220 mod("x", 26)
+221 div("z", 26)
+222 add("x", -12)
+223 eql("x", "w")
+224 eql("x", 0)
+225 mul("y", 0)
+226 add("y", 25)
+227 mul("y", "x")
+228 add("y", 1)
+229 mul("z", "y")
+230 mul("y", 0)
+231 add("y", "w")
+232 add("y", 4)
+233 mul("y", "x")
+234 add("z", "y")
+
+235 inp("w14")
+236 mul("x", 0)
+237 add("x", "z")
+238 mod("x", 26)
+239 div("z", 26)
+240 add("x", -13)
+241 eql("x", "w")
+242 eql("x", 0)
+243 mul("y", 0)
+244 add("y", 25)
+245 mul("y", "x")
+246 add("y", 1)
+247 mul("z", "y")
+248 mul("y", 0)
+249 add("y", "w")
+250 add("y", 11)
+251 mul("y", "x")
+252 add("z", "y")
