@@ -2,26 +2,25 @@
 % Please edit documentation in R/day24.R
 \name{day24}
 \alias{day24}
-\alias{f24a}
-\alias{f24b}
+\alias{f24a_run_with_maximum_number}
+\alias{f24b_run_with_minimum_number}
 \alias{example_data_24}
 \title{Day 24: Arithmetic Logic Unit}
 \usage{
-f24a(x)
+f24a_run_with_maximum_number()
 
-f24b(x)
+f24b_run_with_minimum_number()
 
 example_data_24(example = 1)
 }
 \arguments{
-\item{x}{some data}
-
 \item{example}{Which example data to use (by position or name). Defaults to
 1.}
 }
 \value{
-For Part One, \code{f24a(x)} returns .... For Part Two,
-\code{f24b(x)} returns ....
+For Part One and Part Two, \code{f24a_run_with_maximum_number()} and
+\code{f24b_run_with_minimum_number()} return the result of running the ALU on
+the (my) puzzle input using the maximum and minimum numbers.
 }
 \description{
 \href{https://adventofcode.com/2021/day/24}{Arithmetic Logic Unit}
@@ -139,11 +138,12 @@ largest model number accepted by MONAD?}
 
 \strong{Part Two}
 
-\emph{(Use have to manually add this yourself.)}
+As the submarine starts booting up things like the \href{https://www.youtube.com/watch?v=RXJKdh1KZ0w}{Retro Encabulator}, you realize
+that maybe you don\'t need all these submarine features after all.
 
-\emph{(Try using \code{convert_clipboard_html_to_roxygen_md()})}
+\emph{What is the smallest model number accepted by MONAD?}
 }
 \examples{
-f24a(example_data_24())
-f24b()
+f24a_run_with_maximum_number()
+f24b_run_with_minimum_number()
 }

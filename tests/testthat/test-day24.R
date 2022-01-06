@@ -1,3 +1,4 @@
-test_that("multiplication works", {
-  expect_equal(2 * 2, 4)
+test_that("day 24", {
+  # tests are hard-coded assertions in the code
+  expect_true(TRUE)
 })

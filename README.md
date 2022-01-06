@@ -57,9 +57,12 @@ puzzles.
 
 -   00a/b *Write puzzle description like this:* Period separated strategies. Enumerated.
 
--   23a/b *Solve a tile sliding game:* No code. Solved by hand (see inst/notes-day-22b-moves.R).
-
--   25a/b *Simulate movement in a grid that wraps around:* Matrix subsetting. Mod1.
+-   23a/b *Solve a tile sliding game:* No code. Solved by hand 
+    (see inst/notes-day-22b-moves.R).
+-   24a/b *Find inputs that produce 0 for a program:* Objects via closures.
+    Nonstandard evaluation. Static analysis.
+-   25a/b *Simulate movement in a grid that wraps around:* Matrix subsetting. 
+    Mod1.
 
 
 By “book-keeping”, I mean basic programming where I keep track of some
