@@ -20,8 +20,9 @@ example_data_16(example = 1)
 1.}
 }
 \value{
-For Part One, \code{f16a_sum_packet_versions(x)} returns .... For Part Two,
-\code{f16b(x)} returns ....
+For Part One, \code{f16a_sum_packet_versions(x)} returns the sum of packet
+versions. For Part Two, \code{f16b_eval_packets(x)} returns the result of the
+evaluating the code in the packets.
 }
 \description{
 \href{https://adventofcode.com/2021/day/16}{Packet Decoder}
@@ -252,6 +253,6 @@ in the value \code{9}.
 hexadecimal-encoded BITS transmission?}
 }
 \examples{
-# f16a_sum_packet_versions(example_data_16())
-# f16b()
+f16a_sum_packet_versions(example_data_16()[1])
+f16b_eval_packets(example_data_16()[6])
 }

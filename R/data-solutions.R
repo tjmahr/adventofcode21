@@ -32,7 +32,7 @@ aoc_solutions <- list(
   day15a = 592,
   day15b = 2897,
   day16a = 843,
-  day16b = NA,
+  day16b = 5390807940351,
   day17a = 9180,
   day17b = 3767,
   day18a = 4116,

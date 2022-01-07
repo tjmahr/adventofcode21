@@ -1,5 +1,4 @@
 test_that("day 16", {
-  testthat::skip("not today")
   example_data_16()[4] |>
     f16a_sum_packet_versions() |>
     expect_equal(16)

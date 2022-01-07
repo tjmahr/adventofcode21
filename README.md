@@ -57,19 +57,23 @@ puzzles.
 
 -   00a/b *Write puzzle description like this:* Period separated strategies. Enumerated.
 
+-   16a/b *Decode packets and run code inside of them:* Recursion (parsing). Creating and evaluating R code.
+
 -   23a/b *Solve a tile sliding game:* No code. Solved by hand 
     (see inst/notes-day-22b-moves.R).
 -   24a/b *Find inputs that produce 0 for a program:* Objects via closures.
-    Nonstandard evaluation. Static analysis.
+    Creating and evaluating R code. Static analysis.
 -   25a/b *Simulate movement in a grid that wraps around:* Matrix subsetting. 
     Mod1.
 
-
-By “book-keeping”, I mean basic programming where I keep track of some
+Book-keeping: basic programming where I keep track of some
 changing state like a position in a vector.
 
-By “math”, I mean studying the problem and using math to find a shortcut
+Math: Studying the problem and using math to find a shortcut
 that lets me skip some computations.
+
+Creating and evaluating R code: Constructing R function calls from the input and 
+evaluating them in R. Converting the problem into running an R script.
 
 ## Helpful builtin R functions
 
@@ -80,7 +84,7 @@ otherwise appreciate somewhat more from these exercises:
 
 -   [`which()`](https://rdrr.io/r/base/which.html) but with `arr.ind = TRUE` for easier matrix subsetting
 -   [`simplify2Array()`](https://rdrr.io/r/base/lapply.html) for combining a list of vectors into a matrix
-
+-   [`..1`, `..2`](https://rdrr.io/r/base/dots.html) for creating functions like `v_eq <- function(...) as.numeric(..1 == ..2)`
 
 
 ### 2020 list

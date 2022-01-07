@@ -228,19 +228,28 @@
 #' hexadecimal-encoded BITS transmission?*
 #'
 #' @param x some data
-#' @return For Part One, `f16a_sum_packet_versions(x)` returns .... For Part Two,
-#'   `f16b(x)` returns ....
+#' @return For Part One, `f16a_sum_packet_versions(x)` returns the sum of packet
+#'   versions. For Part Two, `f16b_eval_packets(x)` returns the result of the
+#'   evaluating the code in the packets.
 #' @export
 #' @examples
-#' # f16a_sum_packet_versions(example_data_16())
-#' # f16b()
+#' f16a_sum_packet_versions(example_data_16()[1])
+#' f16b_eval_packets(example_data_16()[6])
 f16a_sum_packet_versions <- function(x) {
+  # this day was the last finished because the changes from part 1 to part 2
+  # broke part 1. there is a lot of redundancy here that I do not like. I wish
+  # base R had a rapply() that was more user friendly. I couldn't figure it out.
+  #
+  # I also made a mistake of not combining the literal values into a single
+  # number before the evaluation. the examples all used small numbers where
+  # this was not an issue, so I didn't detect the problem until too late.
+
   # strategy: recursion
-  # x <- example_data_16()[5]
   bits <- f16_prepare_bits(x)
   packets <- f16_parse_packets(bits)
-  packets |>
-    lapply(getElement, "version") |>
+  p <- unlist(packets)
+  p <- p[grepl("version", names(p))]
+  p |>
     unlist() |>
     strtoi(2) |>
     sum()
@@ -250,12 +259,17 @@ f16a_sum_packet_versions <- function(x) {
 #' @rdname day16
 #' @export
 f16b_eval_packets <- function(x) {
+  # strategy: construct and evaluate R code
+
+  # recursively construct commands
   make_code <- function(packets) {
-    commands <- character(length(packets))
+    commands <- character(length = length(packets))
 
     for (packet_i in seq_along(packets)) {
       this_packet <- packets[[packet_i]]
       if (is.list(this_packet)) {
+        # FUN(ARGS): if we have subpackets, then the op is FUN and ARGS are the
+        # recursive calls on the subpackets. otherwise, we have literal value
         if (!is.null(this_packet$subpackets)) {
           command <- sprintf(
             "%s(%s)",
@@ -278,63 +292,11 @@ f16b_eval_packets <- function(x) {
   v_lt <- function(...) as.numeric(..1 < ..2)
   v_eq <- function(...) as.numeric(..1 == ..2)
 
-  # x <- "C200B40A82"
-
   bits <- f16_prepare_bits(x)
   packets <- f16_parse_packets(bits)
-  str(packets)
-
   code <- make_code(packets)
-  message(code)
   result <- eval(parse(text = code))
   result
-#
-#   clean_list <- function(packets) {
-#     ls <- list()
-#     for (packet in packets) {
-#       if (is.list(packet)) {
-#         l <- list()
-#         l$op <- packet$op
-#         if (!is.null(packet$subpackets)) {
-#           l$sub <- clean_list(packet$subpackets)
-#         }
-#         ls <- c(ls, l)
-#       }
-#     }
-#     ls
-#
-#   }
-#   clean_list(packets) |> str()
-#   make_call <- function(packets) {
-#     for (packet in packets) {
-#       op <- packet$op
-#       sub <- packet$subpackets
-#     }
-#     # pair
-#     if (!is.null(packets$subpackets)) {
-#       lapply(packets, getElement, "op")
-#     } else {
-#       lapply(packets$subpackets, make_call)
-#       # make_call(packets$subpackets)
-#     }
-#     # call(packets$op, )
-#   }
-#   packets$subpackets
-#   make_call(packets)
-#
-#   make_call <- function(ops) {
-#
-#     if (length(ops) == 0) {
-#       NULL
-#     } else if (is.na(ops[1]) || !startsWith(ops[1], "v_")) {
-#       c(ops[1], make_call(ops[-1]))
-#       # call("c", make_call(ops[-1]))
-#     } else {
-#       call(ops[1], make_call(ops[-1]))
-#     }
-#
-#   }
-#   make_call(ops)
 }
 
 
@@ -366,7 +328,12 @@ f16_prepare_bits <- function(x) {
 
 
 f16_parse_packets <- function(x) {
-  # do_flatten <- flatten
+  is_terminated <- function(x) {
+    has_a_1 <- grepl("1", x)
+    is_empty <- x == ""
+    !has_a_1 || is_empty
+  }
+
   set_op <- function(data) {
     map <- c(
       "000" = "v_sum",
@@ -380,7 +347,17 @@ f16_parse_packets <- function(x) {
     )
     data$op <- map[data$type]
     if (data$op == "v_val") {
-      data$op <- as.character(strtoi(data$literal_value, 2))
+      # peel off the leading bit
+      bits <- substr(data$literal_value, 2, 5) |>
+        paste0(collapse = "") |>
+        as.character() |>
+        strsplit("") |>
+        unlist() |>
+        as.numeric()
+      # manual binary
+      powers <- bits |> seq_along() |> rev()
+      powers_to_use <- (powers - 1)[bits == 1]
+      data$op <- sum(2 ^ powers_to_use)
     }
     data
   }
@@ -392,21 +369,26 @@ f16_parse_packets <- function(x) {
 
     starts <- starts[seq_len(subgroups)]
     ends <- starts + 4
-    substr(rep(x, length(starts)), starts, ends)
+    parts <- substr(rep(x, length(starts)), starts, ends)
+
   }
 
   chomp_type_0 <- function(x) {
     length_field <- substr(x, 1, 15)
     length <- strtoi(length_field, 2)
 
-    # bits <- subpackets
     subpackets <- substr(x, 15 + 1, 15 + length)
     rest <- substr(x, 15 + length + 1, nchar(x))
-    l <- chomp_one(subpackets)
+    packets <- list()
+    while (!is_terminated(subpackets)) {
+      l <- chomp_one(subpackets)
+      packets <- c(packets, list(l))
+      subpackets <- l$rest
+    }
+
     list(
-      subpackets = l,
+      subpackets = packets,
       sub_length = length,
-      num_sub = NA,
       rest = rest
     )
   }
@@ -415,28 +397,30 @@ f16_parse_packets <- function(x) {
     length_field <- substr(x, 1, 11)
     length <- strtoi(length_field, 2)
     rest <- substr(x, 12, nchar(x))
-    # bits <- rest
-    # very wasteful right here
+
     l <- as.list(seq_len(length))
     for (i in seq_len(length)) {
       l[[i]] <- chomp_one(rest)
       rest <- l[[i]][["rest"]]
     }
+
     list(
       subpackets = l,
       sub_length = NA,
       num_sub = length,
-      rest = tail(l, 1)[[1]][["rest"]])
+      rest = tail(l, 1)[[1]][["rest"]]
+    )
   }
 
-  chomp_operator_packet <- function(type_id, subbits) {
+  chomp_operator_packet <- function(type_id, x) {
     if (type_id == "0") {
-      chomp_type_0(subbits)
+      chomp_type_0(x)
     } else if (type_id == "1") {
-      chomp_type_1(subbits)
+      chomp_type_1(x)
     }
   }
 
+  # for when we want to chomp a fixed number of subpackets
   chomp_one <- function(bits) {
     data <- list()
     data$version <- substr(bits, 1, 3)
@@ -452,36 +436,24 @@ f16_parse_packets <- function(x) {
         7 + sum(nchar(data$literal_value)),
         nchar(bits)
       )
-      # we keep track of the rest at each step (data$rest)
-      # which maybe be different than the rest (rest) after
-      # processing subpackets
       rest <- data$rest
-      subpackets <- list()
     }
-
 
     if (!is_literal_value) {
       data <- set_op(data)
-
       data$literal_value <- NA
       length_type_id <- substr(bits, 7, 7)
       data$rest <- substr(bits, 8, nchar(bits))
-
-      # x <- data$rest
       results <- chomp_operator_packet(length_type_id, data$rest)
-      data$sub_length <- results$sub_length
       data$num_sub <- results$num_sub
       data$subpackets <- results$subpackets
-      subpackets <- list()
-      rest <- results$rest
       data$rest <- results$rest
     }
 
     data
-
   }
 
-
+  # recursive function that consumes a whole string
   chomp <- function(bits, history = list()) {
     data <- list()
     data$version <- substr(bits, 1, 3)
@@ -497,44 +469,22 @@ f16_parse_packets <- function(x) {
         7 + sum(nchar(data$literal_value)),
         nchar(bits)
       )
-      # we keep track of the rest at each step (data$rest)
-      # which maybe be different than the rest (rest) after
-      # processing subpackets
       rest <- data$rest
-      subpackets <- list()
     }
 
     if (!is_literal_value) {
       data <- set_op(data)
-
       data$literal_value <- NA
       length_type_id <- substr(bits, 7, 7)
       data$rest <- substr(bits, 8, nchar(bits))
-
-      # x <- data$rest
       results <- chomp_operator_packet(length_type_id, data$rest)
-      data$sub_length <- results$sub_length
-      data$num_sub <- results$num_sub
-      # if (flatten) {
-      #   subpackets <- results$subpackets
-      # } else {
-        data$subpackets <- results$subpackets
-        subpackets <- list()
-      # }
+      data$subpackets <- results$subpackets
       rest <- results$rest
     }
 
-    # data$packet_length <- nchar(bits) - nchar(rest)
+    history <- c(history, list(data))
 
-
-    history <- c(history, list(data), subpackets)
-
-
-    has_a_1 <- !grepl("1", rest)
-    is_empty <- rest == ""
-    is_terminated <- has_a_1 || is_empty
-
-    if (!is_terminated) {
+    if (!is_terminated(rest)) {
       chomp(rest, history)
     } else {
       history
@@ -543,6 +493,7 @@ f16_parse_packets <- function(x) {
 
   chomp(x)
 }
+
 
 #' @param example Which example data to use (by position or name). Defaults to
 #'   1.
